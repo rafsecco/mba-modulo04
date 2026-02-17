@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TelesEducacao.Conteudos.Data;
+
 namespace TelesEducacao.Conteudo.API.Configurations;
 
 public static class ApiConfig
@@ -5,6 +8,9 @@ public static class ApiConfig
 	public static IServiceCollection AddApiConfigurations(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddControllers();
+
+		services.AddDbContext<ConteudosContext>(options =>
+			options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 		services.AddCors(options =>
 		{

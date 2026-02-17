@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TelesEducacao.Conteudo.Application\TelesEducacao.Conteudos.Application.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Data\TelesEducacao.Conteudos.Data.csproj" />
   </ItemGroup>
 
