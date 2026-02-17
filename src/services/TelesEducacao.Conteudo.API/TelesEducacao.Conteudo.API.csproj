@@ -11,10 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Application\TelesEducacao.Conteudos.Application.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Data\TelesEducacao.Conteudos.Data.csproj" />
   </ItemGroup>
