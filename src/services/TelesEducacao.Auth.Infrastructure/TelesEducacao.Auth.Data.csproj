@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <ProjectReference Include="..\TelesEduaccao.Auth.Application\TelesEducacao.Auth.Application.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Auth.Domain\TelesEducacao.Auth.Domain.csproj" />
+  </ItemGroup>
+
+
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+  </ItemGroup>
+
+
+</Project>
