@@ -113,7 +113,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        var tokens = await _jwtService.GenerateTokensAsync(user);
+        var tokens = await _jwtService.GenerateTokenAsync(user);
 
         return Ok(new
         {
@@ -155,68 +155,5 @@ public class AuthController : ControllerBase
             message = result.Message,
             data = result.Data
         });
-    }
-
-    [HttpPost("revogar-token")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RevogarToken([FromBody] RefreshTokenRequest request)
-    {
-        var result = await _jwtService.RevokeTokenAsync(request.RefreshToken, "Revogado pelo usuário");
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = result.Message
-            });
-        }
-
-        return Ok(new
-        {
-            success = true,
-            message = result.Message
-        });
-    }
-
-    [HttpPost("revogar-todos-tokens")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> RevogarTodosTokens()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = "Usuário não identificado"
-            });
-        }
-
-        var result = await _jwtService.RevokeAllUserTokensAsync(userId, "Todos os tokens revogados pelo usuário");
-
-        return Ok(new
-        {
-            success = true,
-            message = result.Message
-        });
-    }
-
-    [HttpPost("sair")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Sair([FromBody] RefreshTokenRequest request)
-    {
-        // Revoga o refresh token específico
-        await _jwtService.RevokeTokenAsync(request.RefreshToken, "Logout do usuário");
-
-        return Ok(new
-        {
-            success = true,
-            message = "Logout realizado com sucesso"
-        });
-    }
+    }   
 }
