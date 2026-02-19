@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelesEducacao.Auth.Applicat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelesEducacao.Auth.Api", "src\services\TelesEducacao.Auth.Api\TelesEducacao.Auth.Api.csproj", "{267F16C1-B96A-4AA1-863F-A419B62E7245}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelesEducacao.Auth.Data", "..\..\proj-04\mba-modulo04\src\services\TelesEducacao.Auth.Infrastructure\TelesEducacao.Auth.Data.csproj", "{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -275,6 +277,18 @@ Global
 		{267F16C1-B96A-4AA1-863F-A419B62E7245}.Release|x64.Build.0 = Release|Any CPU
 		{267F16C1-B96A-4AA1-863F-A419B62E7245}.Release|x86.ActiveCfg = Release|Any CPU
 		{267F16C1-B96A-4AA1-863F-A419B62E7245}.Release|x86.Build.0 = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|x64.Build.0 = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Debug|x86.Build.0 = Debug|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|x64.ActiveCfg = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|x64.Build.0 = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|x86.ActiveCfg = Release|Any CPU
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -307,6 +321,7 @@ Global
 		{45D7539D-E1B4-46C2-B0D8-352481EFE0A8} = {7635018D-52EF-4B85-95A4-F80FBD596CDF}
 		{6F6C2B72-2114-4A5D-97A4-C108E7D31830} = {7635018D-52EF-4B85-95A4-F80FBD596CDF}
 		{267F16C1-B96A-4AA1-863F-A419B62E7245} = {37B3C3B3-AE38-4F81-BDD6-0A53258C111C}
+		{902F9E0E-58DB-1DE1-67BA-FF244C26B1A9} = {7635018D-52EF-4B85-95A4-F80FBD596CDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA81EC5F-F50E-4AE4-AC09-5F4ABAD77FEC}
