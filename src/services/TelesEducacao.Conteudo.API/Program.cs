@@ -6,6 +6,7 @@ builder.Services.AddSwaggerConfigureServices();
 builder.Services.RegisterServices();
 
 var app = builder.Build();
+app.UseDbMigrationHelper();
 app.UseSwaggerConfiguration();
 app.UseApiCoreConfigurations();
 

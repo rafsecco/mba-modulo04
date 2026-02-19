@@ -3,12 +3,21 @@ using TelesEducacao.Conteudos.Domain;
 
 namespace TelesEducacao.Conteudo.API.Configurations;
 
+public static class DbMigrationHelperExtension
+{
+	public static void UseDbMigrationHelper(this WebApplication app)
+	{
+		DbMigrationHelpers.EnsureSeedData(app).Wait();
+	}
+}
+
 public static class DbMigrationHelpers
 {
 	/// <summary>
-	///     Generate migrations before running this method, you can use command bellow:
-	///     Nuget package manager: Add-Migration DbInit -context ConteudosContext
-	///     Dotnet CLI: dotnet ef migrations add DbInit -c ConteudosContext
+	///		Na pasta raiz do projeto execute os comandos abaixo para gerar as migrations:
+	///		dotnet ef migrations add Initial_Conteudo --project ./src/services/TelesEducacao.Conteudo.Data --startup-project ./src/services/TelesEducacao.Conteudo.API --context ConteudosContext --configuration "Development"
+	///		dotnet ef database update --project ./src/services/TelesEducacao.Conteudo.Data --startup-project ./src/services/TelesEducacao.Conteudo.API --context ConteudosContext --configuration "Development"
+	///		dotnet ef migrations remove --project ./src/services/TelesEducacao.Conteudo.Data --startup-project ./src/services/TelesEducacao.Conteudo.API --context ConteudosContext --configuration "Development"
 	/// </summary>
 	public static async Task EnsureSeedData(WebApplication serviceScope)
 	{
@@ -38,9 +47,9 @@ public static class DbMigrationHelpers
 		if (context.Aulas.Any())
 			return;
 
-		var curso1 = new Curso("Curso 1", "Curso 1 descrição", true, 100m, new ConteudoProgramatico("CP 1", "CP 1 descrição"));
+		var curso1 = new Curso("Curso 1", "Curso 1 descrição", true, 100.0m, new ConteudoProgramatico("CP 1", "CP 1 descrição"));
 		var curso2 = new Curso("Curso 2", "Curso 2 descrição", true, 200.50m, new ConteudoProgramatico("CP 2", "CP 2 descrição"));
-		var curso3 = new Curso("Curso 3", "Curso 3 descrição", true, 300m, new ConteudoProgramatico("CP 3", "CP 3 descrição"));
+		var curso3 = new Curso("Curso 3", "Curso 3 descrição", true, 300.0m, new ConteudoProgramatico("CP 3", "CP 3 descrição"));
 		await context.Cursos.AddRangeAsync(curso1, curso2, curso3);
 
 		var aula1 = new Aula("Aula 1 titulo", "Aula 1 conteudo", curso1.Id);

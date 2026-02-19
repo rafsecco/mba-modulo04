@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using TelesEducacao.Conteudos.Application.AutoMapper;
 using TelesEducacao.Conteudos.Data;
 
 namespace TelesEducacao.Conteudo.API.Configurations;
@@ -20,6 +22,14 @@ public static class ApiConfig
 						.AllowAnyOrigin()
 						.AllowAnyMethod()
 						.AllowAnyHeader());
+		});
+
+		services.AddAutoMapper(cfg => { },typeof(DtoToDomainMappingProfile),
+			typeof(DomainToDtoMappingProfile));
+
+		services.AddMediatR(cfg =>
+		{
+			cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 		});
 
 		return services;

@@ -9,6 +9,7 @@ public static class DependencyInjectionConfig
 {
 	public static void RegisterServices(this IServiceCollection services)
 	{
+		services.AddScoped<ICargaHorariaService, CargaHorariaService>();
 		services.AddScoped<ICursoRepository, CursoRepository>();
 		services.AddScoped<ICursoAppService, CursoAppService>();
 		services.AddScoped<ConteudosContext>();
