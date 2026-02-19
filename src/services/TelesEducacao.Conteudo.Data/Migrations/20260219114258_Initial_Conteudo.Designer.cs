@@ -12,8 +12,8 @@ using TelesEducacao.Conteudos.Data;
 namespace TelesEducacao.Conteudos.Data.Migrations
 {
     [DbContext(typeof(ConteudosContext))]
-    [Migration("20251105001729_Initial")]
-    partial class Initial
+    [Migration("20260219114258_Initial_Conteudo")]
+    partial class Initial_Conteudo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

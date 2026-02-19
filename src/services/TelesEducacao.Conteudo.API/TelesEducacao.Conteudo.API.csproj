@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Conteudo.Application\TelesEducacao.Conteudos.Application.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Conteudo.Data\TelesEducacao.Conteudos.Data.csproj" />
+  </ItemGroup>
+
+</Project>
