@@ -20,12 +20,13 @@ public static class DbMigrationHelpers
         using var scope = serviceProvider.CreateScope();
 
         var alunosContext = scope.ServiceProvider.GetRequiredService<AlunosContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        //TODO: verificar depois como vai ser o seed de alunos, visto que tera uma api pra registro de alunos
+        //var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        //var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         await alunosContext.Database.MigrateAsync();
-        await EnsureSeedRoles(alunosContext, roleManager);
-        await EnsureUsers(alunosContext, userManager);
+        //await EnsureSeedRoles(alunosContext, roleManager);
+        //await EnsureUsers(alunosContext, userManager);
     }
 
     private static async Task CreateUserWithRoleAsync(AlunosContext context, UserManager<IdentityUser> userManager,
@@ -66,8 +67,8 @@ public static class DbMigrationHelpers
 
     private static async Task EnsureUsers(AlunosContext context, UserManager<IdentityUser> userManager)
     {
-        if (context.Users.Any())
-            return;
+        //if (context.Users.Any())
+        //    return;
 
         await CreateUserWithRoleAsync(context, userManager, "admin@mail.com", "Dev@123", "Admin");
         await CreateUserWithRoleAsync(context, userManager, "aluno1@mail.com", "Dev@123", "Aluno");

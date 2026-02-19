@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
@@ -8,7 +7,8 @@ using TelesEducacao.Core.Messages;
 
 namespace TelesEducacao.Alunos.Data;
 
-public class AlunosContext : IdentityDbContext, IUnitOfWork
+//TODO: o contexto de autenticacao que vai herdar de IdentityDbContext
+public class AlunosContext : DbContext, IUnitOfWork
 {
     private readonly IMediatorHandler _mediatorHandler;
 
