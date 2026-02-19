@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 
-namespace TelesEducacao.WebApp.API.Controllers;
+namespace TelesEducacao.WebAPI.Core.Controllers;
 
-//TODO: Remover depois que todas as controller passarem a depender do ControllerBase do core
 public class ControllerBase : Controller
 {
     private readonly IMediatorHandler _mediatorHandler;
     private readonly DomainNotificationHandler _notifications;
 
     public ControllerBase(IMediatorHandler mediatorHandler,
-                          INotificationHandler<DomainNotification> notifications)
+        INotificationHandler<DomainNotification> notifications)
     {
         _mediatorHandler = mediatorHandler;
         _notifications = (DomainNotificationHandler)notifications;
