@@ -1,13 +1,11 @@
 using TelesEducacao.Auth.Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TelesEduaccao.Auth.Infrastructure.Data;
-using TelesEducacao.Auth.Infrastructure.Extensions;
 using TelesEducacao.Auth.Application.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TelesEducacao.Auth.Data.Repositories;
+using TelesEducacao.Auth.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +62,6 @@ builder.Services.AddAuthentication(options =>
 // Application Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -97,8 +94,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Database Migration
-await app.Services.UseDatabaseMigrationAsync();
+app.Services.UseDbMigrationAuthHelper();
 
 // Swagger
 if (app.Environment.IsDevelopment())
