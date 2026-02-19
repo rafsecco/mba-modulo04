@@ -7,17 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Alunos.Application\TelesEducacao.Alunos.Application.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Alunos.Data\TelesEducacao.Alunos.Data.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Application\TelesEducacao.Conteudos.Application.csproj" />
-    <ProjectReference Include="..\TelesEducacao.Conteudo.Data\TelesEducacao.Conteudos.Data.csproj" />
   </ItemGroup>
 
 </Project>

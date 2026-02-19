@@ -5,14 +5,13 @@ using TelesEducacao.Conteudos.Application.Dtos;
 using TelesEducacao.Conteudos.Application.Services;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
-using TelesEducacao.WebAPI.Core.Controllers;
 
 namespace TelesEducacao.Conteudo.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Admin")]
-public class ConteudoController : MainController
+public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.ControllerBase
 {
 	private readonly ICursoAppService _cursoAppService;
 
