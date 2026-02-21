@@ -9,14 +9,14 @@ using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Conteudos.Application.Services;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
-using ControllerBase = TelesEducacao.WebAPI.Core.Controllers.ControllerBase;
+using MainController = TelesEducacao.WebAPI.Core.Controllers.MainController;
 
 namespace TelesEducacao.Alunos.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Aluno")]
-public class AlunosController : ControllerBase
+public class AlunosController : MainController
 {
     private readonly IAlunoQueries _alunoQueries;
 
