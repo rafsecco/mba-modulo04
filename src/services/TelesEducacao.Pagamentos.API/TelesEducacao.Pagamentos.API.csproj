@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -20,6 +21,7 @@
     <ProjectReference Include="..\TelesEducacao.Pagamentos.Data\TelesEducacao.Pagamentos.Data.csproj" />
     <ProjectReference Include="..\TelesEducacao.Pagamentos.AntiCorruption\TelesEducacao.Pagamentos.AntiCorruption.csproj" />
     <ProjectReference Include="..\..\building-blocks\TelesEducacao.Core\TelesEducacao.Core.csproj" />
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
   </ItemGroup>
 
 </Project>

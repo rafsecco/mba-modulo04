@@ -1,19 +1,29 @@
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TelesEducacao.Core.DomainObjects;
-using TelesEducacao.Pagamentos.Business;
 using Microsoft.EntityFrameworkCore;
+using TelesEducacao.Core.Communication.Mediator;
+using TelesEducacao.Core.DomainObjects;
+using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
 
+using ControllerBase = TelesEducacao.WebAPI.Core.Controllers.ControllerBase;
 
 namespace TelesEducacao.Pagamentos.API.Controllers;
 
 [ApiController]
-[Route("pagamentos")]
+[Route("[controller]")]
+[Authorize(Roles = "Aluno")]
 public class PagamentosController : ControllerBase
 {
     private readonly IPagamentoService _pagamentoService;
 
-    public PagamentosController(IPagamentoService pagamentoService)
+    public PagamentosController(
+        INotificationHandler<DomainNotification> notifications,
+        IMediatorHandler mediatorHandler,
+        IPagamentoService pagamentoService
+    ) : base(mediatorHandler, notifications)
     {
         _pagamentoService = pagamentoService;
     }
@@ -31,7 +41,6 @@ public class PagamentosController : ControllerBase
         public string CvvCartao { get; set; } = string.Empty;
     }
 
-  
     public class RealizarPagamentoMatriculaResponse
     {
         public Guid PagamentoId { get; set; }
@@ -39,42 +48,64 @@ public class PagamentosController : ControllerBase
         public StatusTransacao Status { get; set; }
     }
 
- 
-    /// Realiza o pagamento de uma matrícula   
-    [HttpPost("matricula")]
+   
+    [HttpPost("Matriculas/{matriculaId:guid}")]
+    [ProducesResponseType(typeof(RealizarPagamentoMatriculaResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<RealizarPagamentoMatriculaResponse>> RealizarPagamentoMatricula(
-        [FromBody] RealizarPagamentoMatriculaRequest request)
+        Guid matriculaId,
+        [FromBody] RealizarPagamentoMatriculaRequest request,
+        CancellationToken cancellationToken)
     {
-        if (request.MatriculaId == Guid.Empty)
-            return BadRequest("MatriculaId é obrigatório.");
-
-        if (request.AlunoId == Guid.Empty)
-            return BadRequest("AlunoId é obrigatório.");
-
-        if (request.Valor <= 0)
-            return BadRequest("Valor deve ser maior que zero.");
-
-        var pagamentoMatricula = new PagamentoMatricula
+        try
         {
-            MatriculaId = request.MatriculaId,
-            AlunoId = request.AlunoId,
-            Valor = request.Valor,
-            NomeCartao = request.NomeCartao,
-            NumeroCartao = request.NumeroCartao,
-            ExpiracaoCartao = request.ExpiracaoCartao,
-            CvvCartao = request.CvvCartao
-        };
+            
+            if (matriculaId == Guid.Empty)
+                return BadRequest(new { message = "matriculaId inválido." });
 
-        var transacao = await _pagamentoService.RealizarPagamentoMatricula(pagamentoMatricula);
+            if (request is null)
+                return BadRequest(new { message = "Request inválido." });
 
-        return Ok(new RealizarPagamentoMatriculaResponse
+            if (request.MatriculaId == Guid.Empty)
+                return BadRequest(new { message = "MatriculaId é obrigatório." });
+
+            if (request.AlunoId == Guid.Empty)
+                return BadRequest(new { message = "AlunoId é obrigatório." });
+
+            if (request.Valor <= 0)
+                return BadRequest(new { message = "Valor deve ser maior que zero." });
+
+            
+            if (request.MatriculaId != matriculaId)
+                return BadRequest(new { message = "MatriculaId do body deve ser igual ao da rota." });
+
+            var pagamentoMatricula = new PagamentoMatricula
+            {
+                MatriculaId = request.MatriculaId,
+                AlunoId = request.AlunoId,
+                Valor = request.Valor,
+                NomeCartao = request.NomeCartao,
+                NumeroCartao = request.NumeroCartao,
+                ExpiracaoCartao = request.ExpiracaoCartao,
+                CvvCartao = request.CvvCartao
+            };
+
+            var transacao = await _pagamentoService.RealizarPagamentoMatricula(pagamentoMatricula);
+
+           
+            return StatusCode(StatusCodes.Status201Created, new RealizarPagamentoMatriculaResponse
+            {
+                PagamentoId = transacao.PagamentoId,
+                TransacaoId = transacao.Id,
+                Status = transacao.StatusTransacao
+            });
+        }
+        catch (UnauthorizedAccessException ex)
         {
-            PagamentoId = transacao.PagamentoId,
-            TransacaoId = transacao.Id,
-            Status = transacao.StatusTransacao
-        });
+            return Unauthorized(new { message = ex.Message });
+        }
     }
-
 
     public class StatusPagamentoResponse
     {
@@ -85,23 +116,28 @@ public class PagamentosController : ControllerBase
         public decimal Total { get; set; }
         public DateTime DataCadastro { get; set; }
     }
-
-    [HttpGet("matricula/{matriculaId:guid}/status")]
+    
+    [AllowAnonymous] 
+    [HttpGet("Matriculas/{matriculaId:guid}/Status")]
+    [ProducesResponseType(typeof(StatusPagamentoResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StatusPagamentoResponse>> ConsultarStatusPorMatricula(
         Guid matriculaId,
-        [FromServices] PagamentosContext context)
+        [FromServices] PagamentosContext context,
+        CancellationToken cancellationToken)
     {
         if (matriculaId == Guid.Empty)
-            return BadRequest("matriculaId inválido.");
+            return BadRequest(new { message = "matriculaId inválido." });
 
         var transacao = await context.Transacoes
             .AsNoTracking()
             .Where(t => t.MatriculaId == matriculaId)
             .OrderByDescending(t => t.DataCadastro)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (transacao is null)
-            return NotFound("Nenhuma transação encontrada para esta matrícula.");
+            return NotFound(new { message = "Nenhuma transação encontrada para esta matrícula." });
 
         return Ok(new StatusPagamentoResponse
         {
@@ -113,5 +149,4 @@ public class PagamentosController : ControllerBase
             DataCadastro = transacao.DataCadastro
         });
     }
-
 }
