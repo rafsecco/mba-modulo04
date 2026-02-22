@@ -10,6 +10,7 @@ using TelesEducacao.Alunos.Data.Configuration;
 using TelesEducacao.Alunos.Data.Repository;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
+using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.WebAPI.Core.Identidade;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,8 @@ builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
 builder.Services.AddScoped<IAlunoQueries, AlunoQueries>();
 builder.Services.AddScoped<IRequestHandler<CriarAlunoCommand, bool>, CriarAlunoCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<AdicionarMatriculaCommand, bool>, AdicionarMatriculaCommandHandler>();
+//Notifications
+builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
 builder.Services.AddJwtConfiguration(builder.Configuration);
 

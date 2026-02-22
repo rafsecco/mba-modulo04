@@ -1,12 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TelesEducacao.Alunos.API.Dtos;
 using TelesEducacao.Alunos.Application.Commands;
 using TelesEducacao.Alunos.Application.Queries;
 using TelesEducacao.Alunos.Application.Queries.Dtos;
-using TelesEducacao.Alunos.Domain;
-using TelesEducacao.Conteudos.Application.Services;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using MainController = TelesEducacao.WebAPI.Core.Controllers.MainController;
@@ -21,18 +18,18 @@ public class AlunosController : MainController
     private readonly IAlunoQueries _alunoQueries;
 
     //TODO: Acessar de outra forma, sem depender do cursoAppService
-    private readonly ICursoAppService _cursoAppService;
+    //private readonly ICursoAppService _cursoAppService;
 
     private readonly IMediatorHandler _mediatorHandler;
 
     public AlunosController(INotificationHandler<DomainNotification> notifications, IMediatorHandler mediatorHandler,
-        IAlunoQueries alunoQueries,
-        ICursoAppService cursoAppService
+        IAlunoQueries alunoQueries
+    //ICursoAppService cursoAppService
     ) : base(mediatorHandler, notifications)
     {
         _mediatorHandler = mediatorHandler;
         _alunoQueries = alunoQueries;
-        _cursoAppService = cursoAppService;
+        //_cursoAppService = cursoAppService;
     }
 
     [AllowAnonymous]
@@ -66,43 +63,43 @@ public class AlunosController : MainController
         return Ok(matriculaDtos);
     }
 
-    [HttpPost("{id}/Matricula/{cursoId}")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaDto matriculaDto,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            if (id != matriculaDto.AlunoId || cursoId != matriculaDto.CursoId) return BadRequest();
+    //[HttpPost("{id}/Matricula/{cursoId}")]
+    //[ProducesResponseType(StatusCodes.Status201Created)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //public async Task<ActionResult> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaDto matriculaDto,
+    //    CancellationToken cancellationToken)
+    //{
+    //    try
+    //    {
+    //        if (id != matriculaDto.AlunoId || cursoId != matriculaDto.CursoId) return BadRequest();
 
-            var curso = await _cursoAppService.ObterPorId(cursoId);
+    //        var curso = await _cursoAppService.ObterPorId(cursoId);
 
-            if (curso == null) return BadRequest(new { message = "Curso não encontrado." });
+    //        if (curso == null) return BadRequest(new { message = "Curso não encontrado." });
 
-            var command = new AdicionarMatriculaCommand(
-                matriculaDto.AlunoId,
-                matriculaDto.CursoId,
-                curso.Valor,
-                matriculaDto.NomeCartao,
-                matriculaDto.NumeroCartao,
-                matriculaDto.ExpiracaoCartao,
-                matriculaDto.CvvCartao
-            );
+    //        var command = new AdicionarMatriculaCommand(
+    //            matriculaDto.AlunoId,
+    //            matriculaDto.CursoId,
+    //            curso.Valor,
+    //            matriculaDto.NomeCartao,
+    //            matriculaDto.NumeroCartao,
+    //            matriculaDto.ExpiracaoCartao,
+    //            matriculaDto.CvvCartao
+    //        );
 
-            await _mediatorHandler.EnviarComando(command);
+    //        await _mediatorHandler.EnviarComando(command);
 
-            if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
+    //        if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
 
-            var erro = ObterMensagemErro();
+    //        var erro = ObterMensagemErro();
 
-            return BadRequest(new { message = erro });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { message = ex.Message });
-        }
-    }
+    //        return BadRequest(new { message = erro });
+    //    }
+    //    catch (UnauthorizedAccessException ex)
+    //    {
+    //        return Unauthorized(new { message = ex.Message });
+    //    }
+    //}
 
     [HttpPost("{id}/Matricula/{aulaId}/AulasConcluidas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -118,38 +115,38 @@ public class AlunosController : MainController
         return BadRequest(new { message = erro });
     }
 
-    [HttpPost("{id}/Matricula/Certificados")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid id,
-        CancellationToken cancellationToken)
-    {
-        var matricula = await _alunoQueries.ObterMatriculaPorId(id);
+    //[HttpPost("{id}/Matricula/Certificados")]
+    //[ProducesResponseType(StatusCodes.Status201Created)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid id,
+    //    CancellationToken cancellationToken)
+    //{
+    //    var matricula = await _alunoQueries.ObterMatriculaPorId(id);
 
-        if (matricula == null || matricula.MatriculaStatus != MatriculaStatus.Ativa)
-            return BadRequest(new { message = "Matrícula não encontrada." });
+    //    if (matricula == null || matricula.MatriculaStatus != MatriculaStatus.Ativa)
+    //        return BadRequest(new { message = "Matrícula não encontrada." });
 
-        var aulasCurso = await _cursoAppService.ObterAulas(matricula.CursoId);
+    //    var aulasCurso = await _cursoAppService.ObterAulas(matricula.CursoId);
 
-        if (aulasCurso == null || !aulasCurso.Any())
-            return BadRequest(new { message = "Este curso não possui aulas cadastradas." });
+    //    if (aulasCurso == null || !aulasCurso.Any())
+    //        return BadRequest(new { message = "Este curso não possui aulas cadastradas." });
 
-        var aulasConcluidas = await _alunoQueries.ObterAulasConcluidasPorMatriculaId(matricula.Id);
+    //    var aulasConcluidas = await _alunoQueries.ObterAulasConcluidasPorMatriculaId(matricula.Id);
 
-        var totalAulasCurso = aulasCurso.Count();
-        var totalConcluidas = aulasConcluidas.Count();
+    //    var totalAulasCurso = aulasCurso.Count();
+    //    var totalConcluidas = aulasConcluidas.Count();
 
-        if (totalConcluidas < totalAulasCurso)
-            return BadRequest(new
-            {
-                message =
-                    $"Não é possível concluir o curso. Você concluiu {totalConcluidas} de {totalAulasCurso} aulas."
-            });
+    //    if (totalConcluidas < totalAulasCurso)
+    //        return BadRequest(new
+    //        {
+    //            message =
+    //                $"Não é possível concluir o curso. Você concluiu {totalConcluidas} de {totalAulasCurso} aulas."
+    //        });
 
-        var command = new ConcluirCursoCommand(matricula.Id);
-        await _mediatorHandler.EnviarComando(command);
-        if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
-        var erro = ObterMensagemErro();
-        return BadRequest(new { message = erro });
-    }
+    //    var command = new ConcluirCursoCommand(matricula.Id);
+    //    await _mediatorHandler.EnviarComando(command);
+    //    if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
+    //    var erro = ObterMensagemErro();
+    //    return BadRequest(new { message = erro });
+    //}
 }

@@ -27,9 +27,13 @@ public abstract class Service
 
     protected bool TratarErrosResponse(HttpResponseMessage response)
     {
-        if (response.StatusCode == HttpStatusCode.BadRequest) return false;
+        if (response.StatusCode == HttpStatusCode.BadRequest
+            || response.StatusCode == HttpStatusCode.NotFound
+            || response.StatusCode == HttpStatusCode.InternalServerError)
+            return false;
 
         response.EnsureSuccessStatusCode();
+
         return true;
     }
 

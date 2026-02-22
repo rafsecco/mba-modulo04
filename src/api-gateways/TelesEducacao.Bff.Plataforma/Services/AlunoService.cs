@@ -6,7 +6,7 @@ namespace TelesEducacao.Bff.Plataforma.Services;
 
 public interface IAlunoService
 {
-    Task<AlunoDto> ObterPorId(Guid id, CancellationToken cancellationToken);
+    Task<AlunoDto?> ObterPorId(Guid id, CancellationToken cancellationToken);
 }
 
 public class AlunoService : Service, IAlunoService
@@ -19,11 +19,14 @@ public class AlunoService : Service, IAlunoService
         _httpClient.BaseAddress = new Uri(settings.Value.AlunoUrl);
     }
 
-    public async Task<AlunoDto> ObterPorId(Guid id, CancellationToken cancellationToken)
+    public async Task<AlunoDto?> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.GetAsync($"/alunos/{id}");
+        var response = await _httpClient.GetAsync($"/alunos/{id}", cancellationToken);
 
-        TratarErrosResponse(response);
+        if (!TratarErrosResponse(response))
+        {
+            return null;
+        }
 
         return await DeserializarObjetoResponse<AlunoDto>(response);
     }

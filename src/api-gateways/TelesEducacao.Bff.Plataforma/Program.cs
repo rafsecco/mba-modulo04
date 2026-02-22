@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.Configure<AppServicesSettings>(builder.Configuration);
+builder.Services.Configure<AppServicesSettings>(builder.Configuration.GetSection("AppServicesSettings"));
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Total",
