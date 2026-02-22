@@ -3,6 +3,7 @@ using Polly;
 using TelesEducacao.Bff.Plataforma.Extensions;
 using TelesEducacao.Bff.Plataforma.Services;
 using TelesEducacao.WebAPI.Core.Extensions;
+using TelesEducacao.WebAPI.Core.Identidade;
 using TelesEducacao.WebAPI.Core.Usuario;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.Configure<AppServicesSettings>(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Total",
+        builder =>
+            builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+});
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAspNetUser, AspNetUser>();
@@ -24,6 +34,8 @@ builder.Services.AddHttpClient<IAlunoService, AlunoService>()
     .AddPolicyHandler(PollyExtensions.EsperarTentar())
     .AddTransientHttpErrorPolicy(
         p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+
+builder.Services.AddJwtConfiguration(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -62,6 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.UseCors("Total");
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -70,7 +83,7 @@ app.UseSwaggerUI(options =>
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthConfiguration();
 
 app.MapControllers();
 
