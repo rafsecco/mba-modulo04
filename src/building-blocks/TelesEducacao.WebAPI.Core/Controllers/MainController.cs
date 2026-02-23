@@ -5,12 +5,12 @@ using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 
 namespace TelesEducacao.WebAPI.Core.Controllers;
 
-public class ControllerBase : Controller
+public class MainController : Controller
 {
     private readonly IMediatorHandler _mediatorHandler;
     private readonly DomainNotificationHandler _notifications;
 
-    public ControllerBase(IMediatorHandler mediatorHandler,
+    public MainController(IMediatorHandler mediatorHandler,
         INotificationHandler<DomainNotification> notifications)
     {
         _mediatorHandler = mediatorHandler;

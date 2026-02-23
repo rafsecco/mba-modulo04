@@ -1,0 +1,6 @@
+@TelesEducacao.Bff.Plataforma_HostAddress = http://localhost:5137
+
+GET {{TelesEducacao.Bff.Plataforma_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
