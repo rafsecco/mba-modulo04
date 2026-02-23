@@ -11,7 +11,7 @@ namespace TelesEducacao.Conteudo.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Admin")]
-public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.ControllerBase
+public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainController
 {
 	private readonly ICursoAppService _cursoAppService;
 
