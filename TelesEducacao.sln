@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11512.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApps", "WebApps", "{B17C2944-B379-45DA-AF5D-B20D53DF72C0}"
 EndProject
@@ -74,6 +74,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plataforma", "Plataforma", "{5152DABE-CB5C-40C1-B5F6-B0610330D09E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelesEducacao.Bff.Plataforma", "src\api-gateways\TelesEducacao.Bff.Plataforma\TelesEducacao.Bff.Plataforma.csproj", "{56943D2B-F1FC-4D14-84FD-3300700A0727}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MessageBus", "MessageBus", "{F591B49E-2D35-442D-BD77-76E4EAF9440D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelesEducacao.MessageBus", "src\building-blocks\TelesEducacao.MessageBus\TelesEducacao.MessageBus.csproj", "{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -337,6 +341,18 @@ Global
 		{56943D2B-F1FC-4D14-84FD-3300700A0727}.Release|x64.Build.0 = Release|Any CPU
 		{56943D2B-F1FC-4D14-84FD-3300700A0727}.Release|x86.ActiveCfg = Release|Any CPU
 		{56943D2B-F1FC-4D14-84FD-3300700A0727}.Release|x86.Build.0 = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|x64.Build.0 = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Debug|x86.Build.0 = Debug|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|x64.ActiveCfg = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|x64.Build.0 = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|x86.ActiveCfg = Release|Any CPU
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -376,6 +392,8 @@ Global
 		{FB3B1E83-2DF8-47B2-B33C-304728AF648D} = {635CC65E-1322-4793-AF40-D6213384BDCA}
 		{5152DABE-CB5C-40C1-B5F6-B0610330D09E} = {FB3B1E83-2DF8-47B2-B33C-304728AF648D}
 		{56943D2B-F1FC-4D14-84FD-3300700A0727} = {5152DABE-CB5C-40C1-B5F6-B0610330D09E}
+		{F591B49E-2D35-442D-BD77-76E4EAF9440D} = {FE4B4C02-D958-47DC-86ED-5DCDA2083B25}
+		{BFDD9566-DA6F-4CA1-A6EE-D506D474B43E} = {F591B49E-2D35-442D-BD77-76E4EAF9440D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA81EC5F-F50E-4AE4-AC09-5F4ABAD77FEC}

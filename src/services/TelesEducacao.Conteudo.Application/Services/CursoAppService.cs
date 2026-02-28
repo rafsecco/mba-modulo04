@@ -1,6 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
+using FluentValidation.Results;
 using TelesEducacao.Conteudos.Application.Dtos;
 using TelesEducacao.Conteudos.Domain;
+using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 
 namespace TelesEducacao.Conteudos.Application.Services;
 
@@ -17,7 +19,20 @@ public class CursoAppService : ICursoAppService
         _cargaHorariaService = cargaHorariaService;
     }
 
-    public async Task<IEnumerable<CursoDto>> ObterTodos()
+	public async Task<ResponseMessage> Adicionar(CriaCursoDto criaCursoDto)
+	{
+		var validationResult = new ValidationResult();
+		var curso = _mapper.Map<Curso>(criaCursoDto);
+		_cursoRepository.Adicionar(curso);
+
+		await _cursoRepository.UnitOfWork.Commit();
+
+		
+
+		return new ResponseMessage(validationResult);
+	}
+
+	public async Task<IEnumerable<CursoDto>> ObterTodos()
     {
         return _mapper.Map<IEnumerable<CursoDto>>(await _cursoRepository.ObterTodos());
     }
@@ -35,16 +50,6 @@ public class CursoAppService : ICursoAppService
     public async Task<AulaDto> ObterAula(Guid aulaId)
     {
         return _mapper.Map<AulaDto>(await _cursoRepository.ObterAula(aulaId));
-    }
-
-    public async Task<Guid?> Adicionar(CriaCursoDto criaCursoDto)
-    {
-        var curso = _mapper.Map<Curso>(criaCursoDto);
-        _cursoRepository.Adicionar(curso);
-
-        await _cursoRepository.UnitOfWork.Commit();
-
-        return curso.Id;
     }
 
     public async Task Atualizar(AtualizaCursoDto atualizaCursoDto)
