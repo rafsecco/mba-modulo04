@@ -1,9 +1,7 @@
 using TelesEducacao.Conteudo.API.Configurations;
-using TelesEducacao.MessageBus;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApiConfigurations(builder.Configuration);
-builder.Services.AddMessageBus(builder.Configuration);
 builder.Services.AddSwaggerConfigureServices();
 builder.Services.RegisterServices();
 

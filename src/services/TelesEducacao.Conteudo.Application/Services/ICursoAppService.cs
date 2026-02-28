@@ -1,4 +1,5 @@
-﻿using TelesEducacao.Conteudos.Application.Dtos;
+using TelesEducacao.Conteudos.Application.Dtos;
+using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 
 namespace TelesEducacao.Conteudos.Application.Services;
 
@@ -12,9 +13,10 @@ public interface ICursoAppService : IDisposable
 
     Task<AulaDto> ObterAula(Guid aulaId);
 
-    Task<Guid?> Adicionar(CriaCursoDto criaCursoDto);
+    //Task<Guid?> Adicionar(CriaCursoDto criaCursoDto);
+	Task<ResponseMessage> Adicionar(CriaCursoDto criaCursoDto);
 
-    Task Atualizar(AtualizaCursoDto cursoDto);
+	Task Atualizar(AtualizaCursoDto cursoDto);
 
     Task<bool> Remover(Guid id);
 
