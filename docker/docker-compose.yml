@@ -1,0 +1,11 @@
+services:
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+# Na pasta docker execute os seguintes comandos para configurar o ambiente:
+# cp .env.example .env
+# Edite o arquivo .env com as variáveis de ambiente necessárias
+# docker compose -f docker-compose.yml up -d --build

@@ -29,8 +29,11 @@ public static class ApiConfig
 
 		services.AddMediatR(cfg =>
 		{
-			cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+			//cfg.RegisterServicesFromAssembly(typeof(CriarCursoCommandHandler).Assembly);
+			cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 		});
+
+		services.AddMessageBusConfiguration(configuration);
 
 		return services;
 	}
