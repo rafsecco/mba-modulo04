@@ -30,4 +30,40 @@ public class AlunosController : MainController
 
         return Ok(aluno);
     }
+
+    [AllowAnonymous]
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<AlunoDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult> ObterTodos(
+        CancellationToken cancellationToken)
+    {
+        var alunos = await _alunoService.ObterTodos(cancellationToken);
+        return Ok(alunos);
+    }
+
+    [HttpGet("{id}/Matriculas")]
+    [ProducesResponseType(typeof(IEnumerable<MatriculaDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult> ObterMatriculasPorAlunoId(Guid id,
+        CancellationToken cancellationToken)
+    {
+        var matriculaDtos = await _alunoService.ObterMatriculasPorAlunoId(id, cancellationToken);
+        return Ok(matriculaDtos);
+    }
+
+    [HttpPost("{id}/Matricula/{aulaId}/AulasConcluidas")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ConcluirAula(Guid id, Guid aulaId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _alunoService.ConcluirAula(id, aulaId, cancellationToken);
+        if (result)
+        {
+            return StatusCode(StatusCodes.Status201Created);
+        }
+
+        return StatusCode(StatusCodes.Status400BadRequest);
+    }
 }
