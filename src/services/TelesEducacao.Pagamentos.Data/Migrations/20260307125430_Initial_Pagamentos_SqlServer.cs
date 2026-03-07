@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TelesEducacao.Pagamentos.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Pagamentos : Migration
+    public partial class Initial_Pagamentos_SqlServer : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

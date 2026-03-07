@@ -7,15 +7,14 @@ using TelesEducacao.Core.DomainObjects;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
-
-using ControllerBase = TelesEducacao.WebAPI.Core.Controllers.ControllerBase;
+using TelesEducacao.WebAPI.Core.Controllers;
 
 namespace TelesEducacao.Pagamentos.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Aluno")]
-public class PagamentosController : ControllerBase
+public class PagamentosController : MainController
 {
     private readonly IPagamentoService _pagamentoService;
 
@@ -28,13 +27,11 @@ public class PagamentosController : ControllerBase
         _pagamentoService = pagamentoService;
     }
 
-    // DTO de entrada da API
     public class RealizarPagamentoMatriculaRequest
     {
         public Guid MatriculaId { get; set; }
         public Guid AlunoId { get; set; }
         public decimal Valor { get; set; }
-
         public string NomeCartao { get; set; } = string.Empty;
         public string NumeroCartao { get; set; } = string.Empty;
         public string ExpiracaoCartao { get; set; } = string.Empty;
@@ -48,7 +45,16 @@ public class PagamentosController : ControllerBase
         public StatusTransacao Status { get; set; }
     }
 
-   
+    public class StatusPagamentoResponse
+    {
+        public Guid MatriculaId { get; set; }
+        public Guid PagamentoId { get; set; }
+        public Guid TransacaoId { get; set; }
+        public StatusTransacao Status { get; set; }
+        public decimal Total { get; set; }
+        public DateTime DataCadastro { get; set; }
+    }
+
     [HttpPost("Matriculas/{matriculaId:guid}")]
     [ProducesResponseType(typeof(RealizarPagamentoMatriculaResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -60,7 +66,6 @@ public class PagamentosController : ControllerBase
     {
         try
         {
-            
             if (matriculaId == Guid.Empty)
                 return BadRequest(new { message = "matriculaId inválido." });
 
@@ -76,7 +81,6 @@ public class PagamentosController : ControllerBase
             if (request.Valor <= 0)
                 return BadRequest(new { message = "Valor deve ser maior que zero." });
 
-            
             if (request.MatriculaId != matriculaId)
                 return BadRequest(new { message = "MatriculaId do body deve ser igual ao da rota." });
 
@@ -93,7 +97,6 @@ public class PagamentosController : ControllerBase
 
             var transacao = await _pagamentoService.RealizarPagamentoMatricula(pagamentoMatricula);
 
-           
             return StatusCode(StatusCodes.Status201Created, new RealizarPagamentoMatriculaResponse
             {
                 PagamentoId = transacao.PagamentoId,
@@ -107,17 +110,7 @@ public class PagamentosController : ControllerBase
         }
     }
 
-    public class StatusPagamentoResponse
-    {
-        public Guid MatriculaId { get; set; }
-        public Guid PagamentoId { get; set; }
-        public Guid TransacaoId { get; set; }
-        public StatusTransacao Status { get; set; }
-        public decimal Total { get; set; }
-        public DateTime DataCadastro { get; set; }
-    }
-    
-    [AllowAnonymous] 
+    [AllowAnonymous]
     [HttpGet("Matriculas/{matriculaId:guid}/Status")]
     [ProducesResponseType(typeof(StatusPagamentoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

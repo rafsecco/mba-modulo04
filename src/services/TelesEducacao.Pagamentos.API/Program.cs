@@ -22,9 +22,7 @@ builder.Services.AddControllers();
 
 
 builder.Services.AddDbContext<PagamentosContext>(options =>
-{
-    options.UseSqlite("Data Source=pagamentos.db");
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 builder.Services.AddScoped<IPagamentoService, PagamentoService>();
