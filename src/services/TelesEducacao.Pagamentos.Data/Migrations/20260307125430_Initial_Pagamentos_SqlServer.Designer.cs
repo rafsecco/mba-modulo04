@@ -12,8 +12,8 @@ using TelesEducacao.Pagamentos.Data;
 namespace TelesEducacao.Pagamentos.Data.Migrations
 {
     [DbContext(typeof(PagamentosContext))]
-    [Migration("20251213232721_Pagamentos")]
-    partial class Pagamentos
+    [Migration("20260307125430_Initial_Pagamentos_SqlServer")]
+    partial class Initial_Pagamentos_SqlServer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

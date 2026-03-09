@@ -7,24 +7,26 @@ using TelesEducacao.Core.DomainObjects;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
-using TelesEducacao.WebAPI.Core.Controllers;
 
-namespace TelesEducacao.Pagamentos.API.Controllers;
+namespace TelesEducacao.WebApp.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Aluno")]
-public class PagamentosController : MainController
+public class PagamentosController : ControllerBase
 {
     private readonly IPagamentoService _pagamentoService;
+    private readonly PagamentosContext _context;
 
     public PagamentosController(
         INotificationHandler<DomainNotification> notifications,
         IMediatorHandler mediatorHandler,
-        IPagamentoService pagamentoService
+        IPagamentoService pagamentoService,
+        PagamentosContext context
     ) : base(mediatorHandler, notifications)
     {
         _pagamentoService = pagamentoService;
+        _context = context;
     }
 
     public class RealizarPagamentoMatriculaRequest
@@ -117,13 +119,12 @@ public class PagamentosController : MainController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StatusPagamentoResponse>> ConsultarStatusPorMatricula(
         Guid matriculaId,
-        [FromServices] PagamentosContext context,
         CancellationToken cancellationToken)
     {
         if (matriculaId == Guid.Empty)
             return BadRequest(new { message = "matriculaId inválido." });
 
-        var transacao = await context.Transacoes
+        var transacao = await _context.Transacoes
             .AsNoTracking()
             .Where(t => t.MatriculaId == matriculaId)
             .OrderByDescending(t => t.DataCadastro)
