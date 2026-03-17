@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Messages;
 
@@ -14,11 +14,11 @@ public class CancelarMatriculaCommand : Command
     }
 }
 
-public class CancelarMatriaculaCommandHandler : IRequestHandler<CancelarMatriculaCommand, bool>
+public class CancelarMatriculaCommandHandler : IRequestHandler<CancelarMatriculaCommand, bool>
 {
     private readonly IAlunoRepository _alunoRepository;
 
-    public CancelarMatriaculaCommandHandler(IAlunoRepository alunoRepository)
+    public CancelarMatriculaCommandHandler(IAlunoRepository alunoRepository)
     {
         _alunoRepository = alunoRepository;
     }
