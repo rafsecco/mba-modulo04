@@ -16,6 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\building-blocks\TelesEducacao.Core\TelesEducacao.Core.csproj" />
     <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
+    <ProjectReference Include="..\..\services\TelesEducacao.Conteudo.API\TelesEducacao.Conteudo.API.csproj" />
+    <ProjectReference Include="..\..\services\TelesEducacao.Conteudo.Application\TelesEducacao.Conteudos.Application.csproj" />
   </ItemGroup>
 
 </Project>

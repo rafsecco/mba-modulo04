@@ -139,8 +139,7 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Atualiza([FromBody] AtualizaCursoDto atualizaCursoDto,
-		CancellationToken cancellationToken)
+	public async Task<IActionResult> Atualiza([FromBody] AtualizaCursoDto atualizaCursoDto, CancellationToken ct)
 	{
 		try
 		{
@@ -160,7 +159,7 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
 	[HttpDelete]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> Remove(Guid id, CancellationToken cancellationToken)
+	public async Task<IActionResult> Remove(Guid id, CancellationToken ct)
 	{
 		try
 		{
