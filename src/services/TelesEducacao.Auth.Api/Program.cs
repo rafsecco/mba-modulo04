@@ -1,11 +1,16 @@
-using TelesEducacao.Auth.Application.Services;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TelesEducacao.Auth.Application.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using NetDevPack.Security.JwtSigningCredentials;
+using NetDevPack.Security.JwtSigningCredentials.AspNetCore;
+using System.Reflection;
+using TelesEducacao.Auth.Application.Extensions;
+using TelesEducacao.Auth.Application.Services;
+using TelesEducacao.Auth.Data;
 using TelesEducacao.Auth.Infrastructure.Data;
+using TelesEducacao.Core.Communication.Mediator;
+using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.WebAPI.Core.Usuario;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,51 +22,31 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
+var appSettingsSection = builder.Configuration.GetSection("AppTokenSettings");
+builder.Services.Configure<AppTokenSettings>(appSettingsSection);
+
+builder.Services.AddJwksManager(options => options.Algorithm = Algorithm.ES256)
+    .PersistKeysToDatabaseStore<AuthDbContext>();
+
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.SignIn.RequireConfirmedEmail = false;
+    options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AuthDbContext>()
 .AddDefaultTokenProviders();
 
-// JWT Settings
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-// JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-if (jwtSettings == null)
+builder.Services.AddMediatR(cfg =>
 {
-    throw new InvalidOperationException("JwtSettings section is missing or improperly configured.");
-}
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings!.SecretKey)),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidateAudience = true,
-        ValidAudience = jwtSettings.Audience,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 });
 
 // Application Services
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAspNetUser, AspNetUser>();
+builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
+//Notifications
+builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -92,21 +77,21 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 app.Services.UseDbMigrationAuthHelper();
 
 // Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseJwksDiscovery();
 
 app.Run();

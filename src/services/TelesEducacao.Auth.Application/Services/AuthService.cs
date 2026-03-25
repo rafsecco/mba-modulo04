@@ -1,266 +1,184 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using TelesEducacao.Auth.Application.Dtos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using NetDevPack.Security.JwtSigningCredentials.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using TelesEducacao.Auth.Application.Extensions;
 using TelesEducacao.Auth.Application.Models;
+using TelesEducacao.Auth.Data;
+using TelesEducacao.Auth.Data.Models;
+using TelesEducacao.WebAPI.Core.Identidade;
+using TelesEducacao.WebAPI.Core.Usuario;
 
 namespace TelesEducacao.Auth.Application.Services
 {
     public class AuthService
-    {        
-        private readonly UserManager<IdentityUser> _userManager;
+    {
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly AppSettings _appSettings;
+        private readonly AppTokenSettings _appTokenSettingsSettings;
+        private readonly AuthDbContext _context;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public AuthService(            
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
-        {            
-            _userManager = userManager;
+
+        private readonly IJsonWebKeySetService _jwksService;
+        private readonly IAspNetUser _aspNetUser;
+
+        public AuthService(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager,
+            IOptions<AppSettings> appSettings, IOptions<AppTokenSettings> appTokenSettingsSettings, AuthDbContext context,
+            IJsonWebKeySetService jwksService, IAspNetUser aspNetUser, RoleManager<IdentityRole> roleManager)
+        {
             _signInManager = signInManager;
+            _userManager = userManager;
+            _appSettings = appSettings.Value;
+            _appTokenSettingsSettings = appTokenSettingsSettings.Value;
+            _context = context;
+            _jwksService = jwksService;
+            _aspNetUser = aspNetUser;
             _roleManager = roleManager;
         }
 
-        public async Task<AuthResultDto<UserDto>> AuthenticateAsync(string email, string password)
+        public async Task<Guid?> RegistrarAsync(string email, string senha, string roleNome, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(email))
-                return AuthResultDto<UserDto>.Failure("Email é obrigatório");
-
-            if (string.IsNullOrWhiteSpace(password))
-                return AuthResultDto<UserDto>.Failure("Senha é obrigatória");
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return AuthResultDto<UserDto>.Failure("Email não encontrado");
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
-            if (!result.Succeeded)
-            {
-                if (result.IsLockedOut)
-                    return AuthResultDto<UserDto>.Failure("Conta bloqueada temporariamente");
-                
-                if (result.IsNotAllowed)
-                    return AuthResultDto<UserDto>.Failure("Login não permitido. Confirme seu email");
-                
-                return AuthResultDto<UserDto>.Failure("Email ou senha incorretos");
-            }
-
-            var userDto = new UserDto { Id = user.Id, Email = user.Email! };
-            return AuthResultDto<UserDto>.Success(userDto, "Login realizado com sucesso");
-        }
-
-        public async Task<AuthResultDto<Guid>> RegisterAsync(RegisterUserDto registerUserDto)
-        {
-            if (registerUserDto == null)
-                return AuthResultDto<Guid>.Failure("Dados de registro são obrigatórios");
-
-            // Verifica se email já existe
-            var existingUser = await _userManager.FindByEmailAsync(registerUserDto.Email);
-            if (existingUser != null)
-                return AuthResultDto<Guid>.Failure("Email já está em uso");
-
-            // Verifica se role existe
-            var roleExists = await _roleManager.RoleExistsAsync(registerUserDto.Role);
-            if (!roleExists)
-                return AuthResultDto<Guid>.Failure($"Perfil '{registerUserDto.Role}' não existe");
-
             var identityUser = new IdentityUser
             {
-                Email = registerUserDto.Email,
-                UserName = registerUserDto.Email,
-                EmailConfirmed = true // Para desenvolvimento
+                Email = email,
+                UserName = email,
             };
 
-            var result = await _userManager.CreateAsync(identityUser, registerUserDto.Senha);
-            if (!result.Succeeded)
+            var result = await _userManager.CreateAsync(identityUser, senha);
+            if (result.Succeeded)
             {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<Guid>.Failure($"Erro ao criar usuário: {errors}");
+                await AdicionarRoleParaUsuario(identityUser, roleNome);
+                return Guid.Parse(identityUser.Id);
             }
+            return null;
+        }
 
-            var addRoleResult = await _userManager.AddToRoleAsync(identityUser, registerUserDto.Role);
-            if (!addRoleResult.Succeeded)
+        public async Task<UsuarioRespostaLogin?> LoginAsync(string email, string senha, CancellationToken cancellationToken)
+        {
+            var result = await _signInManager.PasswordSignInAsync(email, senha, false, true);
+            if (result.Succeeded)
             {
-                // Se falhou ao adicionar role, remove o usuário criado
-                await _userManager.DeleteAsync(identityUser);
-                var errors = string.Join("; ", addRoleResult.Errors.Select(e => e.Description));
-                return AuthResultDto<Guid>.Failure($"Erro ao atribuir perfil: {errors}");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user is not null && !string.IsNullOrEmpty(user.Email))
+                {
+                    return await GerarJwt(user.Email);
+                }
             }
-
-            return AuthResultDto<Guid>.Success(Guid.Parse(identityUser.Id), "Usuário criado com sucesso");
+            return null;
         }
 
-        public async Task<AuthResultDto<Guid>> LoginAsync(LoginUserDto loginUserDto)
+        private async Task AdicionarRoleParaUsuario(IdentityUser user, string roleName)
         {
-            if (loginUserDto == null)
-                return AuthResultDto<Guid>.Failure("Dados de login são obrigatórios");
-
-            var result = await _signInManager.PasswordSignInAsync(
-                loginUserDto.Email, 
-                loginUserDto.Senha, 
-                isPersistent: false, 
-                lockoutOnFailure: true);
-
-            if (!result.Succeeded)
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role != null)
             {
-                if (result.IsLockedOut)
-                    return AuthResultDto<Guid>.Failure("Conta bloqueada devido a muitas tentativas de login inválidas");
-                
-                if (result.IsNotAllowed)
-                    return AuthResultDto<Guid>.Failure("Login não permitido. Confirme seu email");
-                
-                if (result.RequiresTwoFactor)
-                    return AuthResultDto<Guid>.Failure("Autenticação de dois fatores necessária");
-
-                return AuthResultDto<Guid>.Failure("Email ou senha incorretos");
+                await _userManager.AddToRoleAsync(user, roleName);
             }
-
-            var user = await _userManager.FindByEmailAsync(loginUserDto.Email);
-            if (user == null)
-                return AuthResultDto<Guid>.Failure("Usuário não encontrado");
-
-            return AuthResultDto<Guid>.Success(Guid.Parse(user.Id), "Login realizado com sucesso");
         }
 
-        public async Task<IdentityUser?> GetUserByIdAsync(string userId)
-        {
-            if (string.IsNullOrWhiteSpace(userId))
-                return null;
-
-            return await _userManager.FindByIdAsync(userId);
-        }
-
-        public async Task<IdentityUser?> GetUserByEmailAsync(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return null;
-
-            return await _userManager.FindByEmailAsync(email);
-        }
-
-        public async Task<AuthResultDto<bool>> AddRoleToUserAsync(string userId, string roleName)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<bool>.Failure("Usuário não encontrado");
-
-            var roleExists = await _roleManager.RoleExistsAsync(roleName);
-            if (!roleExists)
-                return AuthResultDto<bool>.Failure($"Perfil '{roleName}' não existe");
-
-            var isInRole = await _userManager.IsInRoleAsync(user, roleName);
-            if (isInRole)
-                return AuthResultDto<bool>.Failure($"Usuário já possui o perfil '{roleName}'");
-
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<bool>.Failure($"Erro ao atribuir perfil: {errors}");
-            }
-
-            return AuthResultDto<bool>.Success(true, "Perfil atribuído com sucesso");
-        }
-
-        public async Task<AuthResultDto<List<string>>> GetUserRolesAsync(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<List<string>>.Failure("Usuário não encontrado");
-
-            var roles = await _userManager.GetRolesAsync(user);
-            return AuthResultDto<List<string>>.Success(roles.ToList(), "Perfis obtidos com sucesso");
-        }
-
-        public async Task<AuthResultDto<bool>> RemoveRoleFromUserAsync(string userId, string roleName)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<bool>.Failure("Usuário não encontrado");
-
-            var isInRole = await _userManager.IsInRoleAsync(user, roleName);
-            if (!isInRole)
-                return AuthResultDto<bool>.Failure($"Usuário não possui o perfil '{roleName}'");
-
-            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<bool>.Failure($"Erro ao remover perfil: {errors}");
-            }
-
-            return AuthResultDto<bool>.Success(true, "Perfil removido com sucesso");
-        }
-
-        public async Task<AuthResultDto<bool>> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<bool>.Failure("Usuário não encontrado");
-
-            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<bool>.Failure($"Erro ao alterar senha: {errors}");
-            }
-
-            return AuthResultDto<bool>.Success(true, "Senha alterada com sucesso");
-        }
-
-        public async Task<AuthResultDto<bool>> ResetPasswordAsync(string userId, string token, string newPassword)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<bool>.Failure("Usuário não encontrado");
-
-            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<bool>.Failure($"Erro ao redefinir senha: {errors}");
-            }
-
-            return AuthResultDto<bool>.Success(true, "Senha redefinida com sucesso");
-        }
-
-        public async Task<AuthResultDto<string>> GeneratePasswordResetTokenAsync(string email)
+        public async Task<UsuarioRespostaLogin> GerarJwt(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return AuthResultDto<string>.Failure("Usuário não encontrado");
+            var claims = await _userManager.GetClaimsAsync(user);
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            return AuthResultDto<string>.Success(token, "Token de redefinição gerado com sucesso");
+            var identityClaims = await ObterClaimsUsuario(claims, user);
+            var encodedToken = CodificarToken(identityClaims);
+
+            var refreshToken = await GerarRefreshToken(email);
+            var resultToken = ObterRespostaToken(encodedToken, user, claims, refreshToken);
+
+            return resultToken;
         }
 
-        public async Task<AuthResultDto<bool>> ConfirmEmailAsync(string userId, string token)
+        private async Task<ClaimsIdentity> ObterClaimsUsuario(ICollection<Claim> claims, IdentityUser user)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<bool>.Failure("Usuário não encontrado");
+            var userRoles = await _userManager.GetRolesAsync(user);
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (!result.Succeeded)
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, ToUnixEpochDate(DateTime.UtcNow).ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(),
+                ClaimValueTypes.Integer64));
+            foreach (var userRole in userRoles)
             {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return AuthResultDto<bool>.Failure($"Erro ao confirmar email: {errors}");
+                claims.Add(new Claim("role", userRole));
             }
 
-            return AuthResultDto<bool>.Success(true, "Email confirmado com sucesso");
+            var identityClaims = new ClaimsIdentity();
+            identityClaims.AddClaims(claims);
+
+            return identityClaims;
         }
 
-        public async Task<AuthResultDto<UserDto>> GetUserInfoAsync(string userId)
+        private string CodificarToken(ClaimsIdentity identityClaims)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return AuthResultDto<UserDto>.Failure("Usuário não encontrado");
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var currentIssuer =
+                $"{_aspNetUser.ObterHttpContext().Request.Scheme}://{_aspNetUser.ObterHttpContext().Request.Host}";
+            var key = _jwksService.GetCurrent();
+            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = currentIssuer,
+                Subject = identityClaims,
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = key
+            });
 
-            var userDto = new UserDto 
-            { 
-                Id = user.Id, 
-                Email = user.Email! 
+            return tokenHandler.WriteToken(token);
+        }
+
+        private UsuarioRespostaLogin ObterRespostaToken(string encodedToken, IdentityUser user,
+            IEnumerable<Claim> claims, RefreshToken refreshToken)
+        {
+            return new UsuarioRespostaLogin
+            {
+                AccessToken = encodedToken,
+                RefreshToken = refreshToken.Token,
+                ExpiresIn = TimeSpan.FromHours(1).TotalSeconds,
+                UsuarioToken = new UsuarioToken
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Claims = claims.Select(c => new UsuarioClaim { Type = c.Type, Value = c.Value })
+                }
+            };
+        }
+
+        private static long ToUnixEpochDate(DateTime date)
+            => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
+                .TotalSeconds);
+
+        private async Task<RefreshToken> GerarRefreshToken(string email)
+        {
+            var refreshToken = new RefreshToken
+            {
+                Username = email,
+                ExpirationDate = DateTime.UtcNow.AddHours(_appTokenSettingsSettings.RefreshTokenExpiration)
             };
 
-            return AuthResultDto<UserDto>.Success(userDto, "Informações do usuário obtidas com sucesso");
+            _context.RefreshTokens.RemoveRange(_context.RefreshTokens.Where(u => u.Username == email));
+            await _context.RefreshTokens.AddAsync(refreshToken);
+
+            await _context.SaveChangesAsync();
+
+            return refreshToken;
+        }
+
+        public async Task<RefreshToken> ObterRefreshToken(Guid refreshToken)
+        {
+            var token = await _context.RefreshTokens.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Token == refreshToken);
+
+            var expirationDate = token.ExpirationDate.ToLocalTime();
+
+            return token != null && expirationDate > DateTime.Now
+                ? token
+                : null;
         }
     }
 }
