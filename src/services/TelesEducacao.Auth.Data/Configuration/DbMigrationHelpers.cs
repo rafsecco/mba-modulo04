@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TelesEducacao.Auth.Data;
 
 
 namespace TelesEducacao.Auth.Infrastructure.Data;

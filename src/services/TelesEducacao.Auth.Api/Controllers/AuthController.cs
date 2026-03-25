@@ -1,29 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TelesEducacao.Auth.Application.Services;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Auth.Application.Dtos;
 using TelesEducacao.Auth.Application.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using TelesEducacao.Auth.Application.Services;
+using TelesEducacao.Core.Communication.Mediator;
+using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.WebAPI.Core.Controllers;
 
 namespace TelesEducacao.Auth.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : MainController
 {
     private readonly AuthService _authService;
-    private readonly IJwtService _jwtService;
 
-    public AuthController(AuthService authService, IJwtService jwtService)
+    public AuthController(INotificationHandler<DomainNotification> notifications, IMediatorHandler mediatorHandler, AuthService authService)
+        : base(mediatorHandler, notifications)
     {
         _authService = authService;
-        _jwtService = jwtService;
     }
 
-    [HttpPost("registrar")]
+    [HttpPost]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Registrar([FromBody] RegisterUserDto dto)
+    public async Task<IActionResult> Registrar([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -40,30 +41,26 @@ public class AuthController : ControllerBase
             });
         }
 
-        var result = await _authService.RegisterAsync(dto);
+        var result = await _authService.RegistrarAsync(dto.Email, dto.Senha, dto.Role, cancellationToken);
 
-        if (!result.IsSuccess)
+        if (!result.HasValue)
         {
             return BadRequest(new
             {
                 success = false,
-                message = result.Message,
-                errors = result.Errors
             });
         }
 
         return Created("", new
         {
-            success = true,
-            message = result.Message,
-            data = new { userId = result.Data }
+            result
         });
     }
 
     [HttpPost("acessar")]
     [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Acessar([FromBody] LoginUserDto dto)
+    public async Task<IActionResult> Acessar([FromBody] LoginUserDto dto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -80,80 +77,21 @@ public class AuthController : ControllerBase
             });
         }
 
-        var loginResult = await _authService.LoginAsync(dto);
+        var loginResult = await _authService.LoginAsync(dto.Email, dto.Senha, cancellationToken);
 
-        if (!loginResult.IsSuccess)
-        {
-            return Unauthorized(new
-            {
-                success = false,
-                message = loginResult.Message,
-                errors = loginResult.Errors
-            });
-        }
-
-        // Busca o usuário para gerar o JWT
-        var userResult = await _authService.AuthenticateAsync(dto.Email, dto.Senha);
-        if (!userResult.IsSuccess)
-        {
-            return Unauthorized(new
-            {
-                success = false,
-                message = "Erro ao gerar token de acesso"
-            });
-        }
-
-        var user = await _authService.GetUserByIdAsync(loginResult.Data.ToString()!);
-        if (user == null)
-        {
-            return Unauthorized(new
-            {
-                success = false,
-                message = "Usuário não encontrado"
-            });
-        }
-
-        var tokens = await _jwtService.GenerateTokenAsync(user);
-
-        return Ok(new
-        {
-            success = true,
-            message = "Login realizado com sucesso",
-            data = tokens
-        });
+        return Ok(loginResult);
     }
 
     [HttpPost("refresh-token")]
     [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
     {
-        if (string.IsNullOrWhiteSpace(request.RefreshToken))
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = "Refresh token é obrigatório"
-            });
-        }
-
-        var result = await _jwtService.RefreshTokenAsync(request.RefreshToken);
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = result.Message,
-                errors = result.Errors
-            });
-        }
+        var result = await _authService.ObterRefreshToken(Guid.Parse(refreshToken));
 
         return Ok(new
         {
-            success = true,
-            message = result.Message,
-            data = result.Data
+            result
         });
-    }   
+    }
 }

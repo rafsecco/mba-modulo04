@@ -14,13 +14,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.10" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
   </ItemGroup>
 
    <ItemGroup>
-    <ProjectReference Include="..\TelesEducacao.Auth.Domain\TelesEducacao.Auth.Domain.csproj" />
-    <ProjectReference Include="..\TelesEducacao.Auth.Infrastructure\TelesEducacao.Auth.Data.csproj" />
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
+    <ProjectReference Include="..\TelesEducacao.Auth.Data\TelesEducacao.Auth.Data.csproj" />
   </ItemGroup>
 
 </Project>
