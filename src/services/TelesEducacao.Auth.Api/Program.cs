@@ -1,13 +1,14 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using NetDevPack.Security.JwtSigningCredentials;
 using NetDevPack.Security.JwtSigningCredentials.AspNetCore;
 using System.Reflection;
 using TelesEducacao.Auth.Application.Extensions;
 using TelesEducacao.Auth.Application.Services;
 using TelesEducacao.Auth.Data;
-using TelesEducacao.Auth.Infrastructure.Data;
+using TelesEducacao.Auth.Data.Configuration;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.WebAPI.Core.Usuario;
@@ -52,28 +53,11 @@ builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotif
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Description = "JWT Authorization header usando Bearer scheme",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+        Title = "Teles Educação API de Autenticação",
+        Version = "v1",
+        Description = "Documentação da API de autenticação JWT",
     });
 });
 
@@ -85,7 +69,10 @@ app.Services.UseDbMigrationAuthHelper();
 
 // Swagger
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Autenticação v1");
+});
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

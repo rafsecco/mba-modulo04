@@ -23,4 +23,8 @@
     <PackageReference Include="NetDevPack.Security.JwtSigningCredentials.Store.EntityFrameworkCore" Version="1.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.Core\TelesEducacao.Core.csproj" />
+  </ItemGroup>
+
 </Project>
