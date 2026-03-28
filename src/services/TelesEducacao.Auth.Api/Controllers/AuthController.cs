@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Auth.Application.Dtos;
 using TelesEducacao.Auth.Application.Models;
 using TelesEducacao.Auth.Application.Services;
+using TelesEducacao.Auth.Data.Models;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.WebAPI.Core.Controllers;
@@ -10,7 +11,7 @@ using TelesEducacao.WebAPI.Core.Controllers;
 namespace TelesEducacao.Auth.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class AuthController : MainController
 {
     private readonly AuthService _authService;
@@ -21,77 +22,54 @@ public class AuthController : MainController
         _authService = authService;
     }
 
-    [HttpPost]
-    [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Registrar([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    [HttpPost("registrar")]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Registrar([FromBody] RegistrarUsuarioDto dto, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState
-                .SelectMany(x => x.Value!.Errors)
-                .Select(x => x.ErrorMessage)
-                .ToList();
+        var resultado = await _authService.RegistrarAsync(dto.Email, dto.Senha, dto.Role, cancellationToken);
 
-            return BadRequest(new
-            {
-                success = false,
-                message = "Dados inválidos",
-                errors = errors
-            });
-        }
-
-        var result = await _authService.RegistrarAsync(dto.Email, dto.Senha, dto.Role, cancellationToken);
-
-        if (!result.HasValue)
+        if (resultado == null || resultado == Guid.Empty)
         {
             return BadRequest(new
             {
                 success = false,
+                message = "Não foi possível realizar o registro. Verifique os dados e tente novamente."
             });
         }
 
-        return Created("", new
-        {
-            result
-        });
+        return CreatedAtAction(nameof(Registrar), new { id = resultado }, resultado);
     }
 
     [HttpPost("acessar")]
-    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UsuarioRespostaLogin), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Acessar([FromBody] LoginUserDto dto, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState
-                .SelectMany(x => x.Value!.Errors)
-                .Select(x => x.ErrorMessage)
-                .ToList();
+        var resultado = await _authService.LoginAsync(dto.Email, dto.Senha, cancellationToken);
 
-            return BadRequest(new
-            {
-                success = false,
-                message = "Dados inválidos",
-                errors = errors
-            });
+        if (resultado == null)
+        {
+            return Unauthorized(new { message = "Usuário ou senha incorretos." });
         }
 
-        var loginResult = await _authService.LoginAsync(dto.Email, dto.Senha, cancellationToken);
-
-        return Ok(loginResult);
+        return Ok(resultado);
     }
 
     [HttpPost("refresh-token")]
-    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+    [ProducesResponseType(typeof(RefreshToken), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken, CancellationToken cancellationToken)
     {
-        var result = await _authService.ObterRefreshToken(Guid.Parse(refreshToken));
+        var resultado = await _authService.ObterRefreshToken(Guid.Parse(refreshToken), cancellationToken);
 
-        return Ok(new
+        if (resultado == null)
         {
-            result
-        });
+            return Unauthorized(new { message = "Sessão expirada. Por favor, faça login novamente." });
+        }
+
+        return Ok(resultado);
     }
 }

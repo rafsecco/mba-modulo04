@@ -35,6 +35,12 @@ builder.Services.AddHttpClient<IAlunoService, AlunoService>()
     .AddTransientHttpErrorPolicy(
         p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
+builder.Services.AddHttpClient<IAuthService, AuthService>()
+    .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+    .AllowSelfSignedCertificate()
+    .AddTransientHttpErrorPolicy(
+        p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+
 builder.Services.AddJwtConfiguration(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>

@@ -162,10 +162,10 @@ public class AuthService
         return refreshToken;
     }
 
-    public async Task<RefreshToken> ObterRefreshToken(Guid refreshToken)
+    public async Task<RefreshToken> ObterRefreshToken(Guid refreshToken, CancellationToken cancellationToken)
     {
         var token = await _context.RefreshTokens.AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Token == refreshToken);
+            .FirstOrDefaultAsync(u => u.Token == refreshToken, cancellationToken);
 
         var expirationDate = token.ExpirationDate.ToLocalTime();
 
