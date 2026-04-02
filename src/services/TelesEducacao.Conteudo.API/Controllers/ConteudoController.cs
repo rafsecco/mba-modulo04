@@ -1,9 +1,7 @@
-using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Conteudos.Application.Dtos;
-using TelesEducacao.Conteudos.Application.Events;
 using TelesEducacao.Conteudos.Application.Services;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
@@ -14,19 +12,16 @@ namespace TelesEducacao.Conteudo.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Admin")]
-public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainController
+public class ConteudoController : WebAPI.Core.Controllers.MainController
 {
 	private readonly ICursoAppService _cursoAppService;
-	private readonly IBus _bus;
 
 	public ConteudoController(
 		INotificationHandler<DomainNotification> notifications,
 		IMediatorHandler mediatorHandler,
-		ICursoAppService cursoAppService,
-		IBus bus) : base(mediatorHandler, notifications)
+		ICursoAppService cursoAppService) : base(mediatorHandler, notifications)
 	{
 		_cursoAppService = cursoAppService;
-		_bus = bus;
 	}
 
 	[HttpPost]
@@ -46,23 +41,8 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
 	}
 	private async Task<ResponseMessage> CriarCurso(CriaCursoDto cursoDto)
 	{
-		var cursoCriado = new CursoCriadoIntegrationEvent(
-			Guid.NewGuid(),
-			cursoDto.Nome,
-			cursoDto.Descricao,
-			cursoDto.Ativo,
-			cursoDto.Valor,
-			cursoDto.ConteudoProgramatico.Titulo,
-			cursoDto.ConteudoProgramatico.Descricao);
-		try
-		{
-			var response = await _bus.Request<CursoCriadoIntegrationEvent, ResponseMessage>(cursoCriado);
-			return response.Message;
-		}
-		catch (Exception)
-		{
-			throw;
-		}
+		var response = await _cursoAppService.Adicionar(cursoDto);
+		return response;
 	}
 
 
@@ -74,21 +54,10 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
 		var response = await AdicionarAula(dto);
 		return StatusCode(StatusCodes.Status201Created, response);
 	}
-	private async Task<ResponseMessage> AdicionarAula(CriaAulaDto aulaDto)
+    private async Task<Guid?> AdicionarAula(CriaAulaDto aulaDto)
 	{
-		var aulaCriada = new AulaCriadaIntegrationEvent(
-			aulaDto.Titulo,
-			aulaDto.Conteudo,
-			aulaDto.CursoId);
-		try
-		{
-			Response<ResponseMessage>? response = await _bus.Request<AulaCriadaIntegrationEvent, ResponseMessage>(aulaCriada);
-			return response.Message;
-		}
-		catch (Exception)
-		{
-			throw;
-		}
+		// use application service to add the lesson directly
+		return await _cursoAppService.AdicionarAula(aulaDto);
 	}
 
 

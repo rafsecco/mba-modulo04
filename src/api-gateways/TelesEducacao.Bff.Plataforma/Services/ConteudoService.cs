@@ -11,21 +11,18 @@ public interface IConteudoService
 	Task<List<AulaDto>> ObterAulasPorCurso(Guid cursoId, CancellationToken cancellationToken);
 	Task<AulaDto> ObterAula(Guid cursoId, Guid aulaId, CancellationToken cancellationToken);
 	Task<bool> Remove(Guid id, CancellationToken cancellationToken);
-
-    Task<bool> Cria(CriaCursoDto criaCursoDto, CancellationToken cancellationToken);
+	Task<bool> Cria(CriaCursoDto criaCursoDto, CancellationToken cancellationToken);
 	Task<bool> CriarAula(Guid cursoId, CriaAulaDto dto, CancellationToken cancellationToken);
 	Task<bool> Atualiza(AtualizaCursoDto atualizaCursoDto, CancellationToken cancellationToken);
 }
 
 public class ConteudoService : Service, IConteudoService
 {
-
 	private readonly HttpClient _httpClient;
 
-    public ConteudoService(HttpClient httpClient, IOptions<AppServicesSettings> settings)
+	public ConteudoService(HttpClient httpClient, IOptions<AppServicesSettings> settings)
 	{
 		_httpClient = httpClient;
-		// use ConteudoUrl for the conteudo service
 		_httpClient.BaseAddress = new Uri(settings.Value.ConteudoUrl);
 	}
 
@@ -98,7 +95,7 @@ public class ConteudoService : Service, IConteudoService
 
 	public async Task<bool> Remove(Guid id, CancellationToken cancellationToken)
 	{
- 	var response = await _httpClient.DeleteAsync($"/Conteudo/{id}", cancellationToken);
+		var response = await _httpClient.DeleteAsync($"/Conteudo/{id}", cancellationToken);
 		return TratarErrosResponse(response);
 	}
 }
