@@ -1,49 +1,104 @@
-using MassTransit;
 using MediatR;
 using TelesEducacao.Conteudos.Application.Commands;
 using TelesEducacao.Conteudos.Application.Events;
 using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
+using TelesEducacao.MessageBus;
 
 namespace TelesEducacao.Conteudo.API.Services;
 
-public class ConteudoIntegrationHandler : IConsumer<CursoCriadoIntegrationEvent>
+public class ConteudoIntegrationHandler : BackgroundService
 {
-	private readonly IMediator _mediator;
+	private readonly IServiceProvider _serviceProvider;
+	private readonly IMessageBus _bus;
+	private IDisposable? _cursoResponder;
+	private IDisposable? _aulaResponder;
 
-	public ConteudoIntegrationHandler(IMediator mediator)
+	public ConteudoIntegrationHandler(IServiceProvider serviceProvider, IMessageBus bus)
 	{
-		_mediator = mediator;
+		_serviceProvider = serviceProvider;
+		_bus = bus;
 	}
 
-	public async Task Consume(ConsumeContext<CursoCriadoIntegrationEvent> context)
+	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		try
+		// register RPC responders for CursoCriado and AulaCriada events
+		_cursoResponder = _bus.RespondAsync<CursoCriadoIntegrationEvent, ResponseMessage>(async request =>
 		{
-			Console.WriteLine("Mensagem recebida");
-			var cursoCommand = new CriarCursoCommand(
-				context.Message.Nome,
-				context.Message.Descricao,
-				context.Message.Ativo,
-				context.Message.Valor,
-				context.Message.ConteudoProgramaticoTitulo,
-				context.Message.ConteudoProgramaticoDescricao
-			);
-			var result = await _mediator.Send(cursoCommand);
+			using var scope = _serviceProvider_CreateScope();
+			var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-			Console.WriteLine("Handler executado");
-
-			if (!result)
+			try
 			{
-				await context.RespondAsync(new ResponseMessage(false, "Erro ao criar um curso"));
-				return;
-			}
+				Console.WriteLine("Mensagem de curso recebida");
 
-			await context.RespondAsync(new ResponseMessage(true));
-		}
-		catch (Exception ex)
+				var cursoCommand = new CriarCursoCommand(
+					request.Nome,
+					request.Descricao,
+					request.Ativo,
+					request.Valor,
+					request.ConteudoProgramaticoTitulo,
+					request.ConteudoProgramaticoDescricao
+				);
+
+				var result = await mediator.Send(cursoCommand);
+
+				Console.WriteLine("Handler de curso executado");
+
+				if (!result)
+					return new ResponseMessage(false, "Erro ao criar um curso");
+
+				return new ResponseMessage(true);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Erro no handler de curso: {ex.Message}");
+				throw;
+			}
+		});
+
+		_aulaResponder = _bus.RespondAsync<AulaCriadaIntegrationEvent, ResponseMessage>(async request =>
 		{
-			Console.WriteLine($"Erro no consumer: {ex.Message}");
-			throw;
-		}
+			using var scope = _serviceProvider_CreateScope();
+			var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+			try
+			{
+				Console.WriteLine("Mensagem de aula recebida");
+
+				var aulaCommand = new CriarAulaCommand(
+					request.Titulo,
+					request.Conteudo,
+					request.CursoId
+				);
+
+				var result = await mediator.Send(aulaCommand);
+
+				Console.WriteLine("Handler de aula executado");
+
+				if (!result)
+					return new ResponseMessage(false, "Erro ao criar a aula");
+
+				return new ResponseMessage(true);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Erro no handler de aula: {ex.Message}");
+				throw;
+			}
+		});
+
+		return Task.CompletedTask;
+	}
+
+	private IServiceScope _serviceProvider_CreateScope()
+	{
+		return _serviceProvider.CreateScope();
+	}
+
+	public override Task StopAsync(CancellationToken cancellationToken)
+	{
+		_cursoResponder?.Dispose();
+		_aulaResponder?.Dispose();
+		return base.StopAsync(cancellationToken);
 	}
 }
