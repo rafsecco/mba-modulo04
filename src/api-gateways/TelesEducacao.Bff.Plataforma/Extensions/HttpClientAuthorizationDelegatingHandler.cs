@@ -24,7 +24,7 @@ public class HttpClientAuthorizationDelegatingHandler : DelegatingHandler
 
         var token = _aspNetUser.ObterUserToken();
 
-        if (token != null)
+        if (!string.IsNullOrEmpty(token))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
