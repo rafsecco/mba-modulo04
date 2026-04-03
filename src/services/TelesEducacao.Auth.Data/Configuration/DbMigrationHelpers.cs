@@ -24,6 +24,9 @@ public static class DbMigrationHelpers
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
         await authContext.Database.MigrateAsync();
+
+        if (authContext.Users.Any()) return;
+
         await EnsureSeedRoles(roleManager);
         await EnsureUsers(authContext, userManager);
     }

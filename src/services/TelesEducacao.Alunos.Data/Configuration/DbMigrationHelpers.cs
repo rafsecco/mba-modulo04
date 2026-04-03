@@ -22,6 +22,8 @@ public static class DbMigrationHelpers
         var alunosContext = scope.ServiceProvider.GetRequiredService<AlunosContext>();
 
         await alunosContext.Database.MigrateAsync();
+        if (alunosContext.Alunos.Any()) return;
+
         await CriaAlunoAsync(alunosContext);
     }
 
