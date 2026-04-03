@@ -10,7 +10,7 @@ using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 namespace TelesEducacao.Conteudo.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class ConteudoController : WebAPI.Core.Controllers.MainController
 {

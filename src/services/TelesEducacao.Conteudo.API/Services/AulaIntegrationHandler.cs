@@ -1,46 +1,67 @@
-using MassTransit;
 using MediatR;
 using TelesEducacao.Conteudos.Application.Commands;
 using TelesEducacao.Conteudos.Application.Events;
 using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
+using TelesEducacao.MessageBus;
 
 namespace TelesEducacao.Conteudo.API.Services;
 
-public class AulaIntegrationHandler : IConsumer<AulaCriadaIntegrationEvent>
+public class AulaIntegrationHandler : BackgroundService
 {
-	private readonly IMediator _mediator;
+	private readonly IServiceProvider _serviceProvider;
+	private readonly IMessageBus _bus;
+	private IDisposable? _aulaResponder;
 
-	public AulaIntegrationHandler(IMediator mediator)
+	public AulaIntegrationHandler(IServiceProvider serviceProvider, IMessageBus bus)
 	{
-		_mediator = mediator;
+		_serviceProvider = serviceProvider;
+		_bus = bus;
 	}
 
-	public async Task Consume(ConsumeContext<AulaCriadaIntegrationEvent> context)
+	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		try
+		_aulaResponder = _bus.RespondAsync<AulaCriadaIntegrationEvent, ResponseMessage>(async request =>
 		{
-			Console.WriteLine("Mensagem recebida");
-			var aulaCommand = new CriarAulaCommand(
-				context.Message.Titulo,
-				context.Message.Conteudo,
-				context.Message.CursoId
-			);
-			var result = await _mediator.Send(aulaCommand);
+			using var scope = _serviceProvider_CreateScope();
+			var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-			Console.WriteLine("Handler executado");
-
-			if (!result)
+			try
 			{
-				await context.RespondAsync(new ResponseMessage(false, "Erro ao criar a aula"));
-				return;
-			}
+				Console.WriteLine("Mensagem de aula recebida");
 
-			await context.RespondAsync(new ResponseMessage(true));
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Erro no consumer: {ex.Message}");
-			throw;
-		}
+				var aulaCommand = new CriarAulaCommand(
+					request.Titulo,
+					request.Conteudo,
+					request.CursoId
+				);
+
+				var result = await mediator.Send(aulaCommand);
+
+				Console.WriteLine("Handler de aula executado");
+
+				if (!result)
+					return new ResponseMessage(false, "Erro ao criar a aula");
+
+				return new ResponseMessage(true);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Erro no handler de aula: {ex.Message}");
+				throw;
+			}
+		});
+
+		return Task.CompletedTask;
+	}
+
+	private IServiceScope _serviceProvider_CreateScope()
+	{
+		return _serviceProvider.CreateScope();
+	}
+
+	public override Task StopAsync(CancellationToken cancellationToken)
+	{
+		_aulaResponder?.Dispose();
+		return base.StopAsync(cancellationToken);
 	}
 }

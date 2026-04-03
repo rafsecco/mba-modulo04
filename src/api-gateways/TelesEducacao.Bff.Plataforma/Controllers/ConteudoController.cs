@@ -6,7 +6,7 @@ using TelesEducacao.Conteudos.Application.Dtos;
 namespace TelesEducacao.Bff.Plataforma.Controllers;
 
 [Authorize]
-[Route("[controller]")]
+[Route("bff/[controller]")]
 public class ConteudoController : MainController
 {
 	private readonly IConteudoService _conteudoService;
