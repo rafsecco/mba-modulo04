@@ -1,15 +1,14 @@
+using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TelesEducacao.MessageBus;
 
 public static class DependencyInjectionExtensions
 {
-	public static IServiceCollection AddMessageBus(this IServiceCollection services, string connection)
-	{
-		if (string.IsNullOrEmpty(connection)) throw new ArgumentNullException();
+    public static void AddMessageBus(this IServiceCollection services, string connectionString)
+    {
+        services.AddEasyNetQ(connectionString);
 
-		services.AddSingleton<IMessageBus>(new MessageBus(connection));
-
-		return services;
-	}
+        services.AddSingleton<IMessageBus, MessageBus>();
+    }
 }

@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using NetDevPack.Security.JwtSigningCredentials;
 using NetDevPack.Security.JwtSigningCredentials.AspNetCore;
 using System.Reflection;
+using TelesEducacao.Auth.API.Configuration;
 using TelesEducacao.Auth.Application.Extensions;
 using TelesEducacao.Auth.Application.Services;
 using TelesEducacao.Auth.Data;
@@ -28,6 +29,8 @@ builder.Services.Configure<AppTokenSettings>(appSettingsSection);
 
 builder.Services.AddJwksManager(options => options.Algorithm = Algorithm.ES256)
     .PersistKeysToDatabaseStore<AuthDbContext>();
+
+builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {

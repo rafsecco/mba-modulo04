@@ -9,5 +9,7 @@ public interface IMediatorHandler
 
     Task EnviarComando<T>(T command) where T : Command;
 
+    Task<bool> EnviarComandoAsync<T>(T command) where T : Command;
+
     Task PublicarNotificacao<T>(T notificacao) where T : DomainNotification;
 }

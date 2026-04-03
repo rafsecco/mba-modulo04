@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using TelesEducacao.Alunos.API.Configuration;
 using TelesEducacao.Alunos.Application.AutoMapper;
 using TelesEducacao.Alunos.Application.Commands;
 using TelesEducacao.Alunos.Application.Queries;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IRequestHandler<AdicionarMatriculaCommand, bool>, Adi
 builder.Services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
 builder.Services.AddJwtConfiguration(builder.Configuration);
+
+builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
 {
