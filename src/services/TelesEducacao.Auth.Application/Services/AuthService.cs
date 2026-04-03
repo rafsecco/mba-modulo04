@@ -9,6 +9,9 @@ using TelesEducacao.Auth.Application.Extensions;
 using TelesEducacao.Auth.Application.Models;
 using TelesEducacao.Auth.Data;
 using TelesEducacao.Auth.Data.Models;
+using TelesEducacao.Core.Common.Constants;
+using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
+using TelesEducacao.MessageBus;
 using TelesEducacao.WebAPI.Core.Usuario;
 
 namespace TelesEducacao.Auth.Application.Services;
@@ -23,10 +26,11 @@ public class AuthService
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly IMessageBus _messageBus;
 
     public AuthService(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager,
         IOptions<AppTokenSettings> appTokenSettingsSettings, AuthDbContext context,
-        IJsonWebKeySetService jwksService, IAspNetUser aspNetUser, RoleManager<IdentityRole> roleManager)
+        IJsonWebKeySetService jwksService, IAspNetUser aspNetUser, RoleManager<IdentityRole> roleManager, IMessageBus messageBus)
     {
         _signInManager = signInManager;
         _userManager = userManager;
@@ -35,6 +39,7 @@ public class AuthService
         _jwksService = jwksService;
         _aspNetUser = aspNetUser;
         _roleManager = roleManager;
+        _messageBus = messageBus;
     }
 
     public async Task<Guid?> RegistrarAsync(string email, string senha, string roleNome,
@@ -50,6 +55,8 @@ public class AuthService
         if (result.Succeeded)
         {
             await AdicionarRoleParaUsuario(identityUser, roleNome);
+            if (AuthConstants.AlunoRole.Equals(roleNome, StringComparison.OrdinalIgnoreCase)) await RegistrarAlunoAsync(identityUser);
+
             return Guid.Parse(identityUser.Id);
         }
 
@@ -86,6 +93,25 @@ public class AuthService
         var resultToken = ObterRespostaToken(encodedToken, user, claims, refreshToken);
 
         return resultToken;
+    }
+
+    private async Task RegistrarAlunoAsync(IdentityUser user)
+    {
+        var usuarioRegistradoEvent = new UsuarioRegistradoIntegrationEvent(Guid.Parse(user.Id));
+
+        try
+        {
+            var message = await _messageBus.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(usuarioRegistradoEvent);
+            if (!message.ValidationResult.IsValid)
+            {
+                await _userManager.DeleteAsync(user);
+            }
+        }
+        catch
+        {
+            await _userManager.DeleteAsync(user);
+            throw;
+        }
     }
 
     private async Task<ClaimsIdentity> ObterClaimsUsuario(ICollection<Claim> claims, IdentityUser user)

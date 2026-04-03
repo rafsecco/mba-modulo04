@@ -8,11 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="automapper" Version="15.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.MessageBus\TelesEducacao.MessageBus.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Data\TelesEducacao.Conteudos.Data.csproj" />
     <ProjectReference Include="..\TelesEducacao.Conteudo.Domain\TelesEducacao.Conteudos.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Consumers\" />
   </ItemGroup>
 
 </Project>

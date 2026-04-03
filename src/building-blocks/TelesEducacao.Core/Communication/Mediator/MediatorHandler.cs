@@ -27,4 +27,9 @@ public class MediatorHandler : IMediatorHandler
     {
         await _mediator.Publish(notificacao);
     }
+
+    public async Task<bool> EnviarComandoAsync<T>(T command) where T : Command
+    {
+        return await _mediator.Send(command);
+    }
 }

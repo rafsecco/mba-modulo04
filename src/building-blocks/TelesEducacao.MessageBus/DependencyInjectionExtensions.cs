@@ -1,31 +1,14 @@
-using System.Reflection;
-using MassTransit;
-using Microsoft.Extensions.Configuration;
+using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TelesEducacao.MessageBus;
 
 public static class DependencyInjectionExtensions
 {
-	public static void AddMessageBus(this IServiceCollection services, IConfiguration configuration, params Assembly[] consumerAssemblies)
-	{
-		services.AddOptions<RabbitMqTransportOptions>()
-			.Bind(configuration.GetSection(nameof(RabbitMqTransportOptions)))
-			.ValidateOnStart();
+    public static void AddMessageBus(this IServiceCollection services, string connectionString)
+    {
+        services.AddEasyNetQ(connectionString);
 
-		services.AddMassTransit(busRegistration =>
-		{
-			//busRegistration.ConfigureHealthCheckOptions(options =>
-			//{
-			//	options.Name = "RabbitMQ";
-			//	options.Tags.Add("infra");
-			//});
-			busRegistration.SetRabbitMqReplyToRequestClientFactory();
-			busRegistration.AddConsumers(consumerAssemblies);
-			busRegistration.UsingRabbitMq((busContext, busConfiguration) =>
-			{
-				busConfiguration.ConfigureEndpoints(busContext);
-			});
-		});
-	}
+        services.AddSingleton<IMessageBus, MessageBus>();
+    }
 }

@@ -19,6 +19,7 @@
   </ItemGroup>
 
    <ItemGroup>
+    <ProjectReference Include="..\..\building-blocks\TelesEducacao.MessageBus\TelesEducacao.MessageBus.csproj" />
     <ProjectReference Include="..\..\building-blocks\TelesEducacao.WebAPI.Core\TelesEducacao.WebAPI.Core.csproj" />
     <ProjectReference Include="..\TelesEducacao.Auth.Data\TelesEducacao.Auth.Data.csproj" />
   </ItemGroup>
