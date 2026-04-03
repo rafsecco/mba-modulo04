@@ -41,6 +41,12 @@ builder.Services.AddHttpClient<IAuthService, AuthService>()
     .AddTransientHttpErrorPolicy(
         p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
+builder.Services.AddHttpClient<IConteudoService, ConteudoService>()
+    .AddHttpMessageHandler<HttpClientAuthorizationDelegatingHandler>()
+    .AllowSelfSignedCertificate()
+    .AddTransientHttpErrorPolicy(
+        p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+
 builder.Services.AddJwtConfiguration(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>

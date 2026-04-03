@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Conteudos.Application.Dtos;
 using TelesEducacao.Conteudos.Application.Services;
 using TelesEducacao.Core.Communication.Mediator;
+using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 
 namespace TelesEducacao.Conteudo.API.Controllers;
@@ -11,15 +12,14 @@ namespace TelesEducacao.Conteudo.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(Roles = "Admin")]
-public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainController
+public class ConteudoController : WebAPI.Core.Controllers.MainController
 {
     private readonly ICursoAppService _cursoAppService;
 
     public ConteudoController(
         INotificationHandler<DomainNotification> notifications,
         IMediatorHandler mediatorHandler,
-        ICursoAppService cursoAppService
-       ) : base(mediatorHandler, notifications)
+        ICursoAppService cursoAppService) : base(mediatorHandler, notifications)
     {
         _cursoAppService = cursoAppService;
     }
@@ -31,7 +31,7 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
     {
         try
         {
-            var response = await _cursoAppService.Adicionar(criaCursoDto);
+            var response = await CriarCurso(criaCursoDto);
             return StatusCode(StatusCodes.Status201Created, response);
         }
         catch (UnauthorizedAccessException ex)
@@ -40,14 +40,25 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
         }
     }
 
+    private async Task<ResponseMessage> CriarCurso(CriaCursoDto cursoDto)
+    {
+        var response = await _cursoAppService.Adicionar(cursoDto);
+        return response;
+    }
+
     [HttpPost("{cursoId}/aulas")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<ActionResult<Guid>> CriarAula(Guid cursoId, [FromBody] CriaAulaDto dto, CancellationToken ct)
     {
         dto.CursoId = cursoId;
-
-        var response = await _cursoAppService.AdicionarAula(dto);
+        var response = await AdicionarAula(dto);
         return StatusCode(StatusCodes.Status201Created, response);
+    }
+
+    private async Task<Guid?> AdicionarAula(CriaAulaDto aulaDto)
+    {
+        // use application service to add the lesson directly
+        return await _cursoAppService.AdicionarAula(aulaDto);
     }
 
     [AllowAnonymous]
@@ -97,8 +108,7 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Atualiza([FromBody] AtualizaCursoDto atualizaCursoDto,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Atualiza([FromBody] AtualizaCursoDto atualizaCursoDto, CancellationToken ct)
     {
         try
         {
@@ -118,7 +128,7 @@ public class ConteudoController : TelesEducacao.WebAPI.Core.Controllers.MainCont
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Remove(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Remove(Guid id, CancellationToken ct)
     {
         try
         {
