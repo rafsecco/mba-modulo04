@@ -2,6 +2,7 @@
 using TelesEducacao.Core.DomainObjects;
 using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.MessageBus;
 
 namespace TelesEducacao.Pagamentos.Business;
 
@@ -10,14 +11,17 @@ public class PagamentoService : IPagamentoService
     private readonly IPagamentoCartaoCreditoFacade _pagamentoCartaoCreditoFacade;
     private readonly IPagamentoRepository _pagamentoRepository;
     private readonly IMediatorHandler _mediatorHandler;
+    private readonly IMessageBus _messageBus;
 
     public PagamentoService(IPagamentoCartaoCreditoFacade pagamentoCartaoCreditoFacade,
                             IPagamentoRepository pagamentoRepository,
-                            IMediatorHandler mediatorHandler)
+                            IMediatorHandler mediatorHandler,
+                            IMessageBus messageBus)
     {
         _pagamentoCartaoCreditoFacade = pagamentoCartaoCreditoFacade;
         _pagamentoRepository = pagamentoRepository;
         _mediatorHandler = mediatorHandler;
+        this._messageBus = messageBus;
     }
 
     public async Task<Transacao> RealizarPagamentoMatricula(PagamentoMatricula pagamentoMatricula)
@@ -39,8 +43,7 @@ public class PagamentoService : IPagamentoService
 
         if (transacao.StatusTransacao == StatusTransacao.Pago)
         {
-            pagamento.AdicionarEvento(new PagamentoRealizadoEvent(pagamento.MatriculaId, pagamentoMatricula.AlunoId, transacao.PagamentoId, transacao.Id, pagamentoMatricula.Valor));
-
+            await _messageBus.PublishAsync<PagamentoRealizadoIntegrationEvent>(new PagamentoRealizadoIntegrationEvent(pagamento.MatriculaId, pagamentoMatricula.AlunoId, transacao.PagamentoId, transacao.Id, pagamentoMatricula.Valor));
             _pagamentoRepository.Adicionar(pagamento);
             _pagamentoRepository.AdicionarTransacao(transacao);
 
@@ -49,7 +52,7 @@ public class PagamentoService : IPagamentoService
         }
 
         await _mediatorHandler.PublicarNotificacao(new DomainNotification("pagamento", "A operadora recusou o pagamento"));
-        await _mediatorHandler.PublicarEvento(new PagamentoRecusadoEvent(pagamento.MatriculaId, pagamentoMatricula.AlunoId, transacao.PagamentoId, transacao.Id, pagamentoMatricula.Valor));
+        await _messageBus.PublishAsync<PagamentoRecusadoIntegrationEvent>(new PagamentoRecusadoIntegrationEvent(pagamento.MatriculaId, pagamentoMatricula.AlunoId, transacao.PagamentoId, transacao.Id, pagamentoMatricula.Valor));
 
         return transacao;
     }

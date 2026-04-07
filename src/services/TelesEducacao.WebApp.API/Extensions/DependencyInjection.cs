@@ -1,6 +1,5 @@
 using MediatR;
 using TelesEducacao.Alunos.Application.Commands;
-using TelesEducacao.Alunos.Application.Events;
 using TelesEducacao.Alunos.Application.Queries;
 using TelesEducacao.Alunos.Data.Repository;
 using TelesEducacao.Alunos.Domain;
@@ -9,7 +8,6 @@ using TelesEducacao.Conteudos.Data;
 using TelesEducacao.Conteudos.Data.Repository;
 using TelesEducacao.Conteudos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
-using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.Pagamentos.AntiCorruption;
 using TelesEducacao.Pagamentos.Business;
@@ -54,8 +52,6 @@ public static class DependencyInjection
         services.AddScoped<Pagamentos.AntiCorruption.IConfigurationManager, Pagamentos.AntiCorruption.ConfigurationManager>();
         services.AddScoped<PagamentosContext>();
 
-        services.AddScoped<INotificationHandler<PagamentoRealizadoEvent>, MatriculaEventHandler>();
-        services.AddScoped<INotificationHandler<PagamentoRecusadoEvent>, MatriculaEventHandler>();
         services.AddScoped<IRequestHandler<CancelarMatriculaCommand, bool>, CancelarMatriculaCommandHandler>();
         services.AddScoped<IRequestHandler<AtivarMatriculaCommand, bool>, AtivarMatriculaCommandHandler>();
         services.AddScoped<IRequestHandler<ConluirAulaCommand, bool>, ConcluirAulaCommandHandler>();

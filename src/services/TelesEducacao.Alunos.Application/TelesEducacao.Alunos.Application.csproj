@@ -13,7 +13,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="automapper" Version="15.0.1" />
+		<PackageReference Include="automapper" Version="16.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
 	</ItemGroup>
 
