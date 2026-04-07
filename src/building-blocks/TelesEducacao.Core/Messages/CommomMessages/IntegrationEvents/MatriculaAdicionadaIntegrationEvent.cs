@@ -1,6 +1,6 @@
 ﻿namespace TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 
-public class MatriculaAdicionadaEvent : IntegrationEvent
+public class MatriculaAdicionadaIntegrationEvent : IntegrationEvent
 {
     public Guid MatriculaId { get; init; }
     public Guid AlunoId { get; init; }
@@ -17,7 +17,7 @@ public class MatriculaAdicionadaEvent : IntegrationEvent
 
     public string CvvCartao { get; init; }
 
-    public MatriculaAdicionadaEvent(Guid matriculaId, decimal valor, Guid alunoId, Guid cursoId, string nomeCartao, string numeroCartao, string expiracaoCartao, string cvvCartao)
+    public MatriculaAdicionadaIntegrationEvent(Guid matriculaId, decimal valor, Guid alunoId, Guid cursoId, string nomeCartao, string numeroCartao, string expiracaoCartao, string cvvCartao)
     {
         AlunoId = alunoId;
         CursoId = cursoId;

@@ -7,6 +7,7 @@ namespace TelesEducacao.Bff.Plataforma.Controllers;
 
 [Authorize]
 [Route("[controller]")]
+[Authorize(Roles = "Aluno")]
 public class AlunosController : MainController
 {
     private readonly IAlunoService _alunoService;

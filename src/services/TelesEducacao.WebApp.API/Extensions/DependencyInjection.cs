@@ -13,7 +13,6 @@ using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.Pagamentos.AntiCorruption;
 using TelesEducacao.Pagamentos.Business;
-using TelesEducacao.Pagamentos.Business.Events;
 using TelesEducacao.Pagamentos.Data;
 using TelesEducacao.Pagamentos.Data.Repository;
 using TelesEducacao.WebApp.API.AccessControl;
@@ -55,7 +54,6 @@ public static class DependencyInjection
         services.AddScoped<Pagamentos.AntiCorruption.IConfigurationManager, Pagamentos.AntiCorruption.ConfigurationManager>();
         services.AddScoped<PagamentosContext>();
 
-        services.AddScoped<INotificationHandler<MatriculaAdicionadaEvent>, PagamentoEventHandler>();
         services.AddScoped<INotificationHandler<PagamentoRealizadoEvent>, MatriculaEventHandler>();
         services.AddScoped<INotificationHandler<PagamentoRecusadoEvent>, MatriculaEventHandler>();
         services.AddScoped<IRequestHandler<CancelarMatriculaCommand, bool>, CancelarMatriculaCommandHandler>();

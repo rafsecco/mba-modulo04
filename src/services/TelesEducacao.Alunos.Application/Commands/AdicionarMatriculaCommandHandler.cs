@@ -4,6 +4,7 @@ using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages;
 using TelesEducacao.Core.Messages.CommomMessages.IntegrationEvents;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.MessageBus;
 
 namespace TelesEducacao.Alunos.Application.Commands;
 
@@ -11,11 +12,13 @@ public class AdicionarMatriculaCommandHandler : IRequestHandler<AdicionarMatricu
 {
     private readonly IAlunoRepository _alunoRepository;
     private readonly IMediatorHandler _mediatorHandler;
+    private readonly IMessageBus _messageBus;
 
-    public AdicionarMatriculaCommandHandler(IAlunoRepository alunoRepository, IMediatorHandler mediatorHandler)
+    public AdicionarMatriculaCommandHandler(IAlunoRepository alunoRepository, IMediatorHandler mediatorHandler, IMessageBus messageBus)
     {
         _alunoRepository = alunoRepository;
         _mediatorHandler = mediatorHandler;
+        _messageBus = messageBus;
     }
 
     public async Task<bool> Handle(AdicionarMatriculaCommand request, CancellationToken cancellationToken)
@@ -27,7 +30,7 @@ public class AdicionarMatriculaCommandHandler : IRequestHandler<AdicionarMatricu
 
         if (matriculaId.HasValue)
         {
-            var matriculaAdicionadaEvent = new MatriculaAdicionadaEvent(
+            var matriculaAdicionadaEvent = new MatriculaAdicionadaIntegrationEvent(
                 matriculaId.Value,
                 request.Valor,
                 request.AlunoId,
@@ -38,7 +41,7 @@ public class AdicionarMatriculaCommandHandler : IRequestHandler<AdicionarMatricu
                 request.CvvCartao
             );
 
-            await _mediatorHandler.PublicarEvento(matriculaAdicionadaEvent);
+            await _messageBus.PublishAsync<MatriculaAdicionadaIntegrationEvent>(matriculaAdicionadaEvent);
         }
 
         return result;

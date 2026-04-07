@@ -6,11 +6,14 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Pagamentos.AntiCorruption;
+using TelesEducacao.Pagamentos.API.Configuration;
+using TelesEducacao.Pagamentos.API.Controllers;
+using TelesEducacao.Pagamentos.API.Models;
 using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
 using TelesEducacao.Pagamentos.Data.Repository;
-using TelesEducacao.Pagamentos.API.Controllers;
-using TelesEducacao.Pagamentos.API.Models;
+using TelesEducacao.WebAPI.Core.Identidade;
+
 
 // aliases pra evitar conflito com IConfigurationManager do .NET
 using IPagamentosConfigManager = TelesEducacao.Pagamentos.AntiCorruption.IConfigurationManager;
@@ -20,19 +23,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-
 builder.Services.AddDbContext<PagamentosContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPagamentoCartaoCreditoFacade, PagamentoCartaoCreditoFacade>();
 builder.Services.AddScoped<IPayPalGateway, PayPalGateway>();
 builder.Services.AddSingleton<IPagamentosConfigManager, PagamentosConfigManager>();
 
-
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
-
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(
@@ -44,41 +43,11 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
 
 
-var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSettingsSection);
-var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+builder.Services.AddJwtConfiguration(builder.Configuration);
 
-if (jwtSettings is null)
-    throw new Exception("JwtSettings não encontrado no appsettings.json.");
-
-var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = true; 
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings.Issuer,
-
-        ValidateAudience = true,
-        ValidAudience = jwtSettings.Audience,
-
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-
-        ValidateLifetime = true
-    };
-});
+builder.Services.AddMessageBusConfiguration(builder.Configuration);
 
 builder.Services.AddAuthorization();
-
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -129,9 +98,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthConfiguration();
 
 app.MapControllers();
 
