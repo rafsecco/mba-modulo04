@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using TelesEducacao.Bff.Plataforma.Extensions;
-using TelesEducacao.Conteudos.Application.Dtos;
+using TelesEducacao.Bff.Plataforma.Dtos;
 
 namespace TelesEducacao.Bff.Plataforma.Services;
 

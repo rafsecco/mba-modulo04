@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TelesEducacao.Bff.Plataforma.Services;
-using TelesEducacao.Conteudos.Application.Dtos;
+using TelesEducacao.Bff.Plataforma.Dtos;
 
 namespace TelesEducacao.Bff.Plataforma.Controllers;
 

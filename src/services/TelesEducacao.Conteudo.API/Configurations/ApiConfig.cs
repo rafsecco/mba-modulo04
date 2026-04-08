@@ -40,7 +40,10 @@ public static class ApiConfig
 
 	public static void UseApiCoreConfigurations(this WebApplication app)
 	{
-		app.UseHttpsRedirection();
+		if (!app.Environment.IsDevelopment())
+		{
+			app.UseHttpsRedirection();
+		}
 
 		app.UseRouting();
 
