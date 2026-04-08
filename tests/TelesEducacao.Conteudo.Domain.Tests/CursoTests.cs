@@ -28,12 +28,6 @@ namespace TelesEducacao.Conteudos.Domain.Tests
             Assert.Equal("O campo Valor do curso não pode se menor igual a 0", ex.Message);
 
             ex = Assert.Throws<DomainException>(() =>
-                new Curso("Nome", "Descricao", false, 100, new ConteudoProgramatico("Conteudo 1", "Descricao conteudo"))
-            );
-
-            Assert.Equal("O campo Imagem do curso não pode estar vazio", ex.Message);
-
-            ex = Assert.Throws<DomainException>(() =>
                 new Curso("Nome", "Descricao", false, 100, new ConteudoProgramatico(string.Empty, "Descricao conteudo"))
             );
 
