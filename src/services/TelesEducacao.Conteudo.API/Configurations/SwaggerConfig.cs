@@ -12,7 +12,7 @@ public static class SwaggerConfigs
 		{
 			c.SwaggerDoc("v1", new OpenApiInfo
 			{
-				Title = "TelesEducação API",
+				Title = "Teles Educação API de Conteúdo",
 				Version = "v1",
 				Description = "Documentação da API com autenticação JWT"
 			});
@@ -54,7 +54,6 @@ public static class SwaggerConfigs
 			app.UseSwaggerUI(c =>
 			{
 				c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelesEducacao Conteúdo API v1");
-				c.RoutePrefix = string.Empty;
 			});
 		}
 
