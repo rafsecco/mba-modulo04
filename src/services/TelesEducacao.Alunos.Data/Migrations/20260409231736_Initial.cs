@@ -33,7 +33,6 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     AlunoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CursoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MatriculaStatus = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    AlunoId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -45,11 +44,6 @@ namespace TelesEducacao.Alunos.Data.Migrations
                         principalTable: "Alunos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Matriculas_Alunos_AlunoId1",
-                        column: x => x.AlunoId1,
-                        principalTable: "Alunos",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -105,11 +99,6 @@ namespace TelesEducacao.Alunos.Data.Migrations
                 name: "IX_Matriculas_AlunoId",
                 table: "Matriculas",
                 column: "AlunoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Matriculas_AlunoId1",
-                table: "Matriculas",
-                column: "AlunoId1");
         }
 
         /// <inheritdoc />

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;

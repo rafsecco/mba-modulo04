@@ -93,9 +93,6 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     b.Property<Guid>("AlunoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AlunoId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("CursoId")
                         .HasColumnType("uniqueidentifier");
 
@@ -110,8 +107,6 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AlunoId");
-
-                    b.HasIndex("AlunoId1");
 
                     b.ToTable("Matriculas");
                 });
@@ -141,14 +136,10 @@ namespace TelesEducacao.Alunos.Data.Migrations
             modelBuilder.Entity("TelesEducacao.Alunos.Domain.Matricula", b =>
                 {
                     b.HasOne("TelesEducacao.Alunos.Domain.Aluno", "Aluno")
-                        .WithMany()
+                        .WithMany("Matriculas")
                         .HasForeignKey("AlunoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TelesEducacao.Alunos.Domain.Aluno", null)
-                        .WithMany("Matriculas")
-                        .HasForeignKey("AlunoId1");
 
                     b.Navigation("Aluno");
                 });
