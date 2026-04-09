@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TelesEducacao.Alunos.Domain;
 
@@ -12,8 +12,8 @@ public class MatriculaMapping : IEntityTypeConfiguration<Matricula>
 
         builder.Property(p => p.MatriculaStatus).HasDefaultValue(MatriculaStatus.PendentePagamento);
 
-        builder.HasOne(c => c.Aluno)
-            .WithMany()
-            .HasForeignKey(c => c.AlunoId);
-    }
+		builder.HasOne(c => c.Aluno)
+			.WithMany(a => a.Matriculas)
+			.HasForeignKey(c => c.AlunoId);
+	}
 }
