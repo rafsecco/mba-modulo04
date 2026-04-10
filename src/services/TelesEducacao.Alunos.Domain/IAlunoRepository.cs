@@ -23,4 +23,7 @@ public interface IAlunoRepository : IRepository<Aluno>
     Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId);
 
     Task<Guid?> AdicionarCertificadoAsync(Guid matriculaId);
+
+    Task<Matricula?> ObterMatriculaPorAlunoIdCursoId(Guid alunoId, Guid cursoId);
+    Task<int> ContarAulasConcluidasPorMatriculaId(Guid matriculaId);
 }

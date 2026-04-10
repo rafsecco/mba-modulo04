@@ -79,6 +79,14 @@ public class AlunoRepository : IAlunoRepository
             .ToListAsync();
     }
 
+    public async Task<int> ContarAulasConcluidasPorMatriculaId(Guid matriculaId)
+    {
+        return await _context.AulasConcluidas
+            .AsNoTracking()
+            .Where(ac => ac.MatriculaId == matriculaId)
+            .CountAsync();
+    }
+
     public async Task<Guid?> AdicionarCertificadoAsync(Guid matriculaId)
     {
         var certificado = new Certificado(matriculaId);
@@ -89,5 +97,13 @@ public class AlunoRepository : IAlunoRepository
     public void Dispose()
     {
         _context.Dispose();
+    }
+
+    public async Task<Matricula?> ObterMatriculaPorAlunoIdCursoId(Guid alunoId, Guid cursoId)
+    {
+        var matricula = await _context.Matriculas
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.AlunoId == alunoId && m.CursoId == cursoId);
+        return matricula;
     }
 }

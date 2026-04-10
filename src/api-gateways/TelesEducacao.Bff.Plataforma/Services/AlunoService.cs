@@ -12,9 +12,13 @@ public interface IAlunoService
 
     Task<IEnumerable<MatriculaDto>> ObterMatriculasPorAlunoId(Guid id, CancellationToken cancellationToken);
 
+    Task<MatriculaDto?> ObterMatriculaPorId(Guid matriculaId, CancellationToken cancellationToken);
+
+    Task<IEnumerable<AulaConcluidaDto>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId, CancellationToken cancellationToken);
+
     Task<bool> ConcluirAula(Guid id, Guid aulaId, CancellationToken cancellationToken);
 
-    Task<bool> SolicitarFinalizacaoCurso(Guid matriculaId, CancellationToken cancellationToken);
+    Task<bool> SolicitarFinalizacaoCurso(Guid matriculaId, int totalAulasCurso, CancellationToken cancellationToken);
 
     Task<bool> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaDto matriculaDto, CancellationToken cancellationToken);
 }
@@ -69,15 +73,39 @@ public class AlunoService : Service, IAlunoService
         return TratarErrosResponse(response);
     }
 
-    public async Task<bool> SolicitarFinalizacaoCurso(Guid matriculaId, CancellationToken cancellationToken)
+    public async Task<bool> SolicitarFinalizacaoCurso(Guid matriculaId, int totalAulasCurso, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PostAsync($"/alunos/{matriculaId}/matricula/certificados", null, cancellationToken);
+        var conteudo = ObterConteudo(totalAulasCurso);
+        var response = await _httpClient.PostAsync($"/matriculas/{matriculaId}/concluir", conteudo, cancellationToken);
         return TratarErrosResponse(response);
     }
 
     public async Task<bool> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaDto matriculaDto, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PostAsJsonAsync($"/alunos/{id}/Matricula/{cursoId}", matriculaDto, cancellationToken);
+        var conteudo = ObterConteudo(matriculaDto);
+        var response = await _httpClient.PostAsJsonAsync($"/alunos/{id}/Matricula/{cursoId}", conteudo, cancellationToken);
         return TratarErrosResponse(response);
+    }
+
+    public async Task<MatriculaDto?> ObterMatriculaPorId(Guid matriculaId, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync($"/alunos/{matriculaId}/Matricula", cancellationToken);
+        if (!TratarErrosResponse(response))
+        {
+            return null;
+        }
+
+        return await DeserializarObjetoResponse<MatriculaDto>(response);
+    }
+
+    public async Task<IEnumerable<AulaConcluidaDto>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync($"/alunos/{matriculaId}/Matricula/AulasConcluidas", cancellationToken);
+        if (!TratarErrosResponse(response))
+        {
+            return [];
+        }
+
+        return await DeserializarObjetoResponse<IEnumerable<AulaConcluidaDto>>(response);
     }
 }

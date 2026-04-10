@@ -11,5 +11,6 @@ public class AlunosDomainToDtoMappingProfile : Profile
         //CreateMap<Source, Destination>();
         CreateMap<Aluno, AlunoDto>();
         CreateMap<Matricula, MatriculaDto>();
+        CreateMap<AulaConluida, AulaConcluidaDto>();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using TelesEducacao.Alunos.Application.Queries.Dtos;
-using TelesEducacao.Alunos.Domain;
 
 namespace TelesEducacao.Alunos.Application.Queries;
 
@@ -13,5 +12,8 @@ public interface IAlunoQueries
 
     Task<MatriculaDto> ObterMatriculaPorId(Guid matriculaId);
 
-    Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId);
+    Task<MatriculaDto> ObterMatriculaPorAlunoIdCursoId(Guid alunoId, Guid cursoId);
+
+    Task<IEnumerable<AulaConcluidaDto>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId);
+    Task<int> ObterTotalAulasConcluidasPorMatriculaId(Guid matriculaId);
 }

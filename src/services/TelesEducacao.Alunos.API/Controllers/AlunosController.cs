@@ -5,7 +5,6 @@ using TelesEducacao.Alunos.API.Dtos;
 using TelesEducacao.Alunos.Application.Commands;
 using TelesEducacao.Alunos.Application.Queries;
 using TelesEducacao.Alunos.Application.Queries.Dtos;
-using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using MainController = TelesEducacao.WebAPI.Core.Controllers.MainController;
@@ -50,13 +49,31 @@ public class AlunosController : MainController
         return Ok(alunos);
     }
 
-    [HttpGet("{id}/Matriculas")]
+    [HttpGet("{alunoId}/Matriculas")]
     [ProducesResponseType(typeof(IEnumerable<MatriculaDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult> ObterMatriculasPorAlunoId(Guid id,
+    public async Task<ActionResult> ObterMatriculasPorAlunoId(Guid alunoId,
         CancellationToken cancellationToken)
     {
-        var matriculaDtos = await _alunoQueries.ObterMatriculasPorAlunoId(id);
+        var matriculaDtos = await _alunoQueries.ObterMatriculasPorAlunoId(alunoId);
         return Ok(matriculaDtos);
+    }
+
+    [HttpGet("{matriculaId}/Matricula")]
+    [ProducesResponseType(typeof(MatriculaDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult> ObterMatriculaPorId(Guid matriculaId,
+      CancellationToken cancellationToken)
+    {
+        var matriculaDto = await _alunoQueries.ObterMatriculaPorId(matriculaId);
+        return Ok(matriculaDto);
+    }
+
+    [HttpGet("{matriculaId}/Matricula/AulasConcluidas")]
+    [ProducesResponseType(typeof(IEnumerable<AulaConcluidaDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> ObterAulasConcluidasPorMatriculaId(Guid matriculaId,
+      CancellationToken cancellationToken)
+    {
+        var aulaConcluidaDtos = await _alunoQueries.ObterAulasConcluidasPorMatriculaId(matriculaId);
+        return Ok(aulaConcluidaDtos);
     }
 
     [HttpPost("{id}/Matricula/{cursoId}")]
@@ -93,35 +110,32 @@ public class AlunosController : MainController
         }
     }
 
-    [HttpPost("{id}/Matricula/{aulaId}/AulasConcluidas")]
+    [HttpPost("{matriculaId}/Matricula/{aulaId}/AulasConcluidas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> ConcluirAula(Guid id, Guid aulaId,
+    public async Task<ActionResult> ConcluirAula(Guid matriculaId, Guid aulaId,
         CancellationToken cancellationToken)
     {
         //verificar se a aula é do curso que o aluno está matriculado
-        var command = new ConluirAulaCommand(id, aulaId);
+        var command = new ConluirAulaCommand(aulaId, matriculaId);
         await _mediatorHandler.EnviarComando(command);
         if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
         var erro = ObterMensagemErro();
         return BadRequest(new { message = erro });
     }
 
-    [HttpPost("{id}/Matricula/Certificados")]
+    [HttpPost("matriculas/{matriculaId}/concluir")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid id,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid matriculaId, [FromBody] int totalAulasCurso, CancellationToken cancellationToken)
     {
-        var matricula = await _alunoQueries.ObterMatriculaPorId(id);
+        var command = new ConcluirCursoCommand(matriculaId, totalAulasCurso);
 
-        if (matricula == null || matricula.MatriculaStatus != MatriculaStatus.Ativa)
-            return BadRequest(new { message = "Matrícula não encontrada." });
-
-        var command = new ConcluirCursoCommand(matricula.Id);
         await _mediatorHandler.EnviarComando(command);
-        if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
-        var erro = ObterMensagemErro();
-        return BadRequest(new { message = erro });
+
+        if (OperacaoValida())
+            return StatusCode(StatusCodes.Status201Created);
+
+        return BadRequest(new { message = ObterMensagemErro() });
     }
 }

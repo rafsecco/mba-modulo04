@@ -11,10 +11,12 @@ namespace TelesEducacao.Bff.Plataforma.Controllers;
 public class AlunosController : MainController
 {
     private readonly IAlunoService _alunoService;
+    private readonly IConteudoService _conteudoService;
 
-    public AlunosController(IAlunoService alunoService)
+    public AlunosController(IAlunoService alunoService, IConteudoService conteudoService)
     {
         _alunoService = alunoService;
+        _conteudoService = conteudoService;
     }
 
     [AllowAnonymous]
@@ -54,6 +56,23 @@ public class AlunosController : MainController
         return Ok(matriculaDtos);
     }
 
+    [HttpGet("{matriculaId}/Matricula")]
+    [ProducesResponseType(typeof(MatriculaDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult> ObterMatriculaPorId(Guid matriculaId,
+    CancellationToken cancellationToken)
+    {
+        var matriculaDto = await _alunoService.ObterMatriculaPorId(matriculaId, cancellationToken);
+        return Ok(matriculaDto);
+    }
+
+    [HttpGet("{matriculaId}/Matricula/AulasConcluidas")]
+    [ProducesResponseType(typeof(IEnumerable<AulaConcluidaDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> ObterAulasConcluidasPorMatriculaId(Guid matriculaId, CancellationToken cancellationToken)
+    {
+        var aulaConcluidaDtos = await _alunoService.ObterAulasConcluidasPorMatriculaId(matriculaId, cancellationToken);
+        return Ok(aulaConcluidaDtos);
+    }
+
     [HttpPost("{id}/Matricula/{aulaId}/AulasConcluidas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,43 +88,30 @@ public class AlunosController : MainController
         return StatusCode(StatusCodes.Status400BadRequest);
     }
 
-    [HttpPost("{matriculaId}/Matricula/Certificados")]
+    [HttpPost("{matriculaId}/curso/{cursoId}/finalizar")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid matriculaId,
+    public async Task<ActionResult> SolicitarFinalizacaoCurso(
+        Guid matriculaId,
+        Guid cursoId,
         CancellationToken cancellationToken)
     {
-        //obter a matricula do aluno
-        //var matricula = await _alunoQueries.ObterMatriculaPorId(id);
+        var aulasCurso = await _conteudoService.ObterAulasPorCurso(cursoId, cancellationToken);
 
-        //obter as aulas do curso
-        //var aulasCurso = await _cursoAppService.ObterAulas(matricula.CursoId);
-
-        //if (aulasCurso == null || !aulasCurso.Any())
-        //    return BadRequest(new { message = "Este curso não possui aulas cadastradas." });
-
-        //obter as aulas concluidas do aluno
-
-        //var aulasConcluidas = await _alunoQueries.ObterAulasConcluidasPorMatriculaId(matricula.Id);
-
-        //var totalAulasCurso = aulasCurso.Count();
-        //var totalConcluidas = aulasConcluidas.Count();
-
-        //if (totalConcluidas < totalAulasCurso)
-        //    return BadRequest(new
-        //    {
-        //        message =
-        //            $"Não é possível concluir o curso. Você concluiu {totalConcluidas} de {totalAulasCurso} aulas."
-        //    });
-
-        var result = await _alunoService.SolicitarFinalizacaoCurso(matriculaId, cancellationToken);
-
-        if (result)
+        if (aulasCurso == null || !aulasCurso.Any())
         {
-            return StatusCode(StatusCodes.Status201Created);
+            return BadRequest(new { message = "Este curso não possui aulas cadastradas." });
         }
 
-        return StatusCode(StatusCodes.Status400BadRequest);
+        var totalAulas = aulasCurso.Count();
+        var result = await _alunoService.SolicitarFinalizacaoCurso(matriculaId, totalAulas, cancellationToken);
+
+        if (!result)
+        {
+            return BadRequest(new { message = "Não foi possível concluir o curso. Verifique as pendências." });
+        }
+
+        return StatusCode(StatusCodes.Status201Created);
     }
 
     [HttpPost("{id}/Matricula/{cursoId}")]
@@ -115,11 +121,9 @@ public class AlunosController : MainController
         CancellationToken cancellationToken)
     {
         if (id != requestDto.AlunoId || cursoId != requestDto.CursoId) return BadRequest();
+        var curso = await _conteudoService.ObterPorId(cursoId, cancellationToken);
 
-        //buscar o curso para obter o valor
-        //var curso = await _cursoAppService.ObterPorId(cursoId);
-
-        //if (curso == null) return BadRequest(new { message = "Curso não encontrado." });
+        if (curso == null) return BadRequest(new { message = "Curso não encontrado." });
 
         var matriculaCompletaDto = new AdicionarMatriculaDto
         {
@@ -129,7 +133,7 @@ public class AlunosController : MainController
             NumeroCartao = requestDto.NumeroCartao,
             ExpiracaoCartao = requestDto.ExpiracaoCartao,
             CvvCartao = requestDto.CvvCartao,
-            Valor = 100//curso.Valor;
+            Valor = curso.Valor,
         };
 
         var result = await _alunoService.AdicionarMatricula(id, cursoId, matriculaCompletaDto, cancellationToken);

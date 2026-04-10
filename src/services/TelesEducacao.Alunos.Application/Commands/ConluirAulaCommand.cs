@@ -6,13 +6,13 @@ namespace TelesEducacao.Alunos.Application.Commands;
 
 public class ConluirAulaCommand : Command, IRequest
 {
-    public Guid MatriculaId { get; init; }
     public Guid AulaId { get; init; }
+    public Guid MatriculaId { get; init; }
 
-    public ConluirAulaCommand(Guid alunoId, Guid matriculaId)
+    public ConluirAulaCommand(Guid aulaId, Guid matriculaId)
     {
-        MatriculaId = alunoId;
-        AulaId = matriculaId;
+        AulaId = aulaId;
+        MatriculaId = matriculaId;
     }
 }
 
