@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TelesEducacao.Conteudos.Application.AutoMapper;
 using TelesEducacao.Conteudos.Data;
+using TelesEducacao.WebAPI.Core.Identidade;
 
 namespace TelesEducacao.Conteudo.API.Configurations;
 
@@ -35,6 +36,8 @@ public static class ApiConfig
 
 		services.AddMessageBusConfiguration(configuration);
 
+		services.AddJwtConfiguration(configuration);
+
 		return services;
 	}
 
@@ -49,7 +52,7 @@ public static class ApiConfig
 
 		app.UseCors("Total");
 
-		app.UseAuthorization();
+		app.UseAuthConfiguration();
 
 		app.MapControllers();
 	}
