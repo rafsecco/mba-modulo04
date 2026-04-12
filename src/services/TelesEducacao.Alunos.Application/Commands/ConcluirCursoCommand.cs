@@ -28,14 +28,14 @@ public class ConcluirCursoCommandValidator : AbstractValidator<ConcluirCursoComm
         _alunoQueries = alunoQueries;
         RuleFor(x => x.MatriculaId).NotEmpty();
         RuleFor(x => x.TotalAulasCurso).GreaterThan(0);
-        RuleFor(x => x).MustAsync(async (command, cancellationToken) => await IsConclusaoValidaAsync(command));
+        RuleFor(x => x).MustAsync(async (command, cancellationToken) => await IsConclusaoValidaAsync(command, cancellationToken));
     }
 
-    public async Task<bool> IsConclusaoValidaAsync(ConcluirCursoCommand command)
+    public async Task<bool> IsConclusaoValidaAsync(ConcluirCursoCommand command, CancellationToken cancellationToken)
     {
         if (command.MatriculaId == Guid.Empty) return false;
 
-        var matricula = await _alunoQueries.ObterMatriculaPorId(command.MatriculaId);
+        var matricula = await _alunoQueries.ObterMatriculaPorIdAsync(command.MatriculaId, cancellationToken);
 
         if (matricula.MatriculaStatus != MatriculaStatus.Ativa)
             return false;

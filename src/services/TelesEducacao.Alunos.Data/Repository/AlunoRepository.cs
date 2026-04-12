@@ -20,14 +20,14 @@ public class AlunoRepository : IAlunoRepository
         _context.Alunos.Add(aluno);
     }
 
-    public async Task<Aluno?> ObterPorUserIdAsync(Guid userId)
+    public async Task<Aluno?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _context.Alunos.FirstOrDefaultAsync(a => a.UserId == userId);
+        return await _context.Alunos.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Aluno>> ObterTodosAsync()
+    public async Task<IEnumerable<Aluno>> ObterTodosAsync(CancellationToken cancellationToken)
     {
-        return await _context.Alunos.ToListAsync();
+        return await _context.Alunos.ToListAsync(cancellationToken);
     }
 
     public async Task<Guid?> AdicionarMatriculaAsync(Guid alunoId, Guid cursoId)
@@ -37,12 +37,12 @@ public class AlunoRepository : IAlunoRepository
         return matricula.Id;
     }
 
-    public async Task<IEnumerable<Matricula>> ObterMatriculasPorAlunoIdAsync(Guid alunoId)
+    public async Task<IEnumerable<Matricula>> ObterMatriculasPorAlunoIdAsync(Guid alunoId, CancellationToken cancellationToken)
     {
         return await _context.Matriculas
              .AsNoTracking()
              .Where(m => m.AlunoId == alunoId)
-             .ToListAsync();
+             .ToListAsync(cancellationToken);
     }
 
     public async Task AlterarStatusMatriculaAsync(Guid matriculaId, MatriculaStatus status)
@@ -66,17 +66,19 @@ public class AlunoRepository : IAlunoRepository
         }
     }
 
-    public async Task<Matricula> ObterMatriculaPorId(Guid matriculaId)
+    public async Task<Matricula> ObterMatriculaPorIdAsync(Guid matriculaId, CancellationToken cancellationToken)
     {
-        return await _context.Matriculas.FindAsync(matriculaId);
+        return await _context.Matriculas
+            .AsNoTracking()
+            .FirstAsync(m => m.Id == matriculaId, cancellationToken);
     }
 
-    public async Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId)
+    public async Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaIdAsync(Guid matriculaId, CancellationToken cancellationToken)
     {
         return await _context.AulasConcluidas
             .AsNoTracking()
             .Where(ac => ac.MatriculaId == matriculaId)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<int> ContarAulasConcluidasPorMatriculaId(Guid matriculaId)

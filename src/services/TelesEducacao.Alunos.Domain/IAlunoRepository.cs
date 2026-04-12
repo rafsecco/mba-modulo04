@@ -6,24 +6,25 @@ public interface IAlunoRepository : IRepository<Aluno>
 {
     void CriarAsync(Aluno aluno);
 
-    Task<Aluno?> ObterPorUserIdAsync(Guid userId);
+    Task<Aluno?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<IEnumerable<Aluno>> ObterTodosAsync();
+    Task<IEnumerable<Aluno>> ObterTodosAsync(CancellationToken cancellationToken);
 
     Task<Guid?> AdicionarMatriculaAsync(Guid alunoId, Guid cursoId);
 
-    Task<IEnumerable<Matricula>> ObterMatriculasPorAlunoIdAsync(Guid alunoId);
+    Task<IEnumerable<Matricula>> ObterMatriculasPorAlunoIdAsync(Guid alunoId, CancellationToken cancellationToken);
 
     Task AlterarStatusMatriculaAsync(Guid matriculaId, MatriculaStatus status);
 
     Task ConcluirAula(Guid matriculaId, Guid aulaId);
 
-    Task<Matricula> ObterMatriculaPorId(Guid matriculaId);
+    Task<Matricula> ObterMatriculaPorIdAsync(Guid matriculaId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId);
+    Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaIdAsync(Guid matriculaId, CancellationToken cancellationToken);
 
     Task<Guid?> AdicionarCertificadoAsync(Guid matriculaId);
 
     Task<Matricula?> ObterMatriculaPorAlunoIdCursoId(Guid alunoId, Guid cursoId);
+
     Task<int> ContarAulasConcluidasPorMatriculaId(Guid matriculaId);
 }

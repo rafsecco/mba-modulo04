@@ -28,13 +28,13 @@ public class AlunosController : MainController
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(AlunoDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AlunoDto>> ObterPorId(Guid id,
         CancellationToken cancellationToken)
     {
-        var aluno = await _alunoQueries.ObterPorId(id);
+        var aluno = await _alunoQueries.ObterPorIdAsync(id, cancellationToken);
         if (aluno == null) return NotFound();
         return Ok(aluno);
     }
@@ -45,46 +45,46 @@ public class AlunosController : MainController
     public async Task<ActionResult> ObterTodos(
         CancellationToken cancellationToken)
     {
-        var alunos = await _alunoQueries.ObterTodos();
+        var alunos = await _alunoQueries.ObterTodosAsync(cancellationToken);
         return Ok(alunos);
     }
 
-    [HttpGet("{alunoId}/Matriculas")]
+    [HttpGet("{alunoId:guid}/matriculas")]
     [ProducesResponseType(typeof(IEnumerable<MatriculaDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> ObterMatriculasPorAlunoId(Guid alunoId,
         CancellationToken cancellationToken)
     {
-        var matriculaDtos = await _alunoQueries.ObterMatriculasPorAlunoId(alunoId);
+        var matriculaDtos = await _alunoQueries.ObterMatriculasPorAlunoIdAsync(alunoId, cancellationToken);
         return Ok(matriculaDtos);
     }
 
-    [HttpGet("{matriculaId}/Matricula")]
+    [HttpGet("matriculas/{matriculaId:guid}")]
     [ProducesResponseType(typeof(MatriculaDto), StatusCodes.Status200OK)]
     public async Task<ActionResult> ObterMatriculaPorId(Guid matriculaId,
       CancellationToken cancellationToken)
     {
-        var matriculaDto = await _alunoQueries.ObterMatriculaPorId(matriculaId);
+        var matriculaDto = await _alunoQueries.ObterMatriculaPorIdAsync(matriculaId, cancellationToken);
         return Ok(matriculaDto);
     }
 
-    [HttpGet("{matriculaId}/Matricula/AulasConcluidas")]
+    [HttpGet("matriculas/{matriculaId:guid}/aulas-concluidas")]
     [ProducesResponseType(typeof(IEnumerable<AulaConcluidaDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> ObterAulasConcluidasPorMatriculaId(Guid matriculaId,
       CancellationToken cancellationToken)
     {
-        var aulaConcluidaDtos = await _alunoQueries.ObterAulasConcluidasPorMatriculaId(matriculaId);
+        var aulaConcluidaDtos = await _alunoQueries.ObterAulasConcluidasPorMatriculaIdAsync(matriculaId, cancellationToken);
         return Ok(aulaConcluidaDtos);
     }
 
-    [HttpPost("{id}/Matricula/{cursoId}")]
+    [HttpPost("{id:guid}/matriculas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaDto matriculaDto,
+    public async Task<ActionResult> AdicionarMatricula(Guid id, AdicionarMatriculaDto matriculaDto,
         CancellationToken cancellationToken)
     {
         try
         {
-            if (id != matriculaDto.AlunoId || cursoId != matriculaDto.CursoId) return BadRequest();
+            if (id != matriculaDto.AlunoId) return BadRequest();
 
             var command = new AdicionarMatriculaCommand(
                 matriculaDto.AlunoId,
@@ -110,13 +110,12 @@ public class AlunosController : MainController
         }
     }
 
-    [HttpPost("{matriculaId}/Matricula/{aulaId}/AulasConcluidas")]
+    [HttpPost("matriculas/{matriculaId:guid}/aulas/{aulaId:guid}/concluir")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> ConcluirAula(Guid matriculaId, Guid aulaId,
         CancellationToken cancellationToken)
     {
-        //verificar se a aula é do curso que o aluno está matriculado
         var command = new ConluirAulaCommand(aulaId, matriculaId);
         await _mediatorHandler.EnviarComando(command);
         if (OperacaoValida()) return StatusCode(StatusCodes.Status201Created);
@@ -124,10 +123,10 @@ public class AlunosController : MainController
         return BadRequest(new { message = erro });
     }
 
-    [HttpPost("matriculas/{matriculaId}/concluir")]
+    [HttpPost("matriculas/{matriculaId:guid}/concluir")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SolicitarFinalizacaoCurso(Guid matriculaId, [FromBody] int totalAulasCurso, CancellationToken cancellationToken)
+    public async Task<ActionResult> SolicitarConclusaoCurso(Guid matriculaId, [FromBody] int totalAulasCurso, CancellationToken cancellationToken)
     {
         var command = new ConcluirCursoCommand(matriculaId, totalAulasCurso);
 

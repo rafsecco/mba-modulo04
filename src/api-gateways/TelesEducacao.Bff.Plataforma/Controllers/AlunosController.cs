@@ -20,14 +20,14 @@ public class AlunosController : MainController
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(AlunoDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<AlunoDto>> ObterAlunoPorId(Guid id,
         CancellationToken cancellationToken)
     {
-        var aluno = await _alunoService.ObterPorId(id, cancellationToken);
+        var aluno = await _alunoService.ObterPorIdAsync(id, cancellationToken);
 
         if (aluno == null)
             return NotFound(new { message = "Aluno não encontrado." });
@@ -42,44 +42,44 @@ public class AlunosController : MainController
     public async Task<ActionResult> ObterTodos(
         CancellationToken cancellationToken)
     {
-        var alunos = await _alunoService.ObterTodos(cancellationToken);
+        var alunos = await _alunoService.ObterTodosAsync(cancellationToken);
         return Ok(alunos);
     }
 
-    [HttpGet("{id}/Matriculas")]
+    [HttpGet("{id:guid}/matriculas")]
     [ProducesResponseType(typeof(IEnumerable<MatriculaDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult> ObterMatriculasPorAlunoId(Guid id,
         CancellationToken cancellationToken)
     {
-        var matriculaDtos = await _alunoService.ObterMatriculasPorAlunoId(id, cancellationToken);
+        var matriculaDtos = await _alunoService.ObterMatriculasPorAlunoIdAsync(id, cancellationToken);
         return Ok(matriculaDtos);
     }
 
-    [HttpGet("{matriculaId}/Matricula")]
+    [HttpGet("matriculas/{matriculaId:guid}")]
     [ProducesResponseType(typeof(MatriculaDto), StatusCodes.Status200OK)]
     public async Task<ActionResult> ObterMatriculaPorId(Guid matriculaId,
     CancellationToken cancellationToken)
     {
-        var matriculaDto = await _alunoService.ObterMatriculaPorId(matriculaId, cancellationToken);
+        var matriculaDto = await _alunoService.ObterMatriculaPorIdAsync(matriculaId, cancellationToken);
         return Ok(matriculaDto);
     }
 
-    [HttpGet("{matriculaId}/Matricula/AulasConcluidas")]
+    [HttpGet("matriculas/{matriculaId:guid}/aulas-concluidas")]
     [ProducesResponseType(typeof(IEnumerable<AulaConcluidaDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> ObterAulasConcluidasPorMatriculaId(Guid matriculaId, CancellationToken cancellationToken)
     {
-        var aulaConcluidaDtos = await _alunoService.ObterAulasConcluidasPorMatriculaId(matriculaId, cancellationToken);
+        var aulaConcluidaDtos = await _alunoService.ObterAulasConcluidasPorMatriculaIdAsync(matriculaId, cancellationToken);
         return Ok(aulaConcluidaDtos);
     }
 
-    [HttpPost("{id}/Matricula/{aulaId}/AulasConcluidas")]
+    [HttpPost("matriculas/{matriculaId:guid}/aulas/{aulaId:guid}/concluir")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> ConcluirAula(Guid id, Guid aulaId,
+    public async Task<ActionResult> ConcluirAula(Guid matriculaId, Guid aulaId,
         CancellationToken cancellationToken)
     {
-        var result = await _alunoService.ConcluirAula(id, aulaId, cancellationToken);
+        var result = await _alunoService.ConcluirAulaAsync(matriculaId, aulaId, cancellationToken);
         if (result)
         {
             return StatusCode(StatusCodes.Status201Created);
@@ -88,10 +88,10 @@ public class AlunosController : MainController
         return StatusCode(StatusCodes.Status400BadRequest);
     }
 
-    [HttpPost("{matriculaId}/curso/{cursoId}/finalizar")]
+    [HttpPost("matriculas/{matriculaId:guid}/curso/{cursoId:guid}/concluir")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> SolicitarFinalizacaoCurso(
+    public async Task<ActionResult> SolicitarConclusaoCurso(
         Guid matriculaId,
         Guid cursoId,
         CancellationToken cancellationToken)
@@ -104,7 +104,7 @@ public class AlunosController : MainController
         }
 
         var totalAulas = aulasCurso.Count();
-        var result = await _alunoService.SolicitarFinalizacaoCurso(matriculaId, totalAulas, cancellationToken);
+        var result = await _alunoService.SolicitarConclusaoCursoAsync(matriculaId, totalAulas, cancellationToken);
 
         if (!result)
         {
@@ -114,15 +114,14 @@ public class AlunosController : MainController
         return StatusCode(StatusCodes.Status201Created);
     }
 
-    [HttpPost("{id}/Matricula/{cursoId}")]
+    [HttpPost("{id:guid}/matriculas")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> AdicionarMatricula(Guid id, Guid cursoId, AdicionarMatriculaRequestDto requestDto,
+    public async Task<ActionResult> AdicionarMatricula(Guid id, AdicionarMatriculaRequestDto requestDto,
         CancellationToken cancellationToken)
     {
-        if (id != requestDto.AlunoId || cursoId != requestDto.CursoId) return BadRequest();
-        var curso = await _conteudoService.ObterPorId(cursoId, cancellationToken);
-
+        if (id != requestDto.AlunoId) return BadRequest();
+        var curso = await _conteudoService.ObterPorId(requestDto.CursoId, cancellationToken);
         if (curso == null) return BadRequest(new { message = "Curso não encontrado." });
 
         var matriculaCompletaDto = new AdicionarMatriculaDto
@@ -136,7 +135,7 @@ public class AlunosController : MainController
             Valor = curso.Valor,
         };
 
-        var result = await _alunoService.AdicionarMatricula(id, cursoId, matriculaCompletaDto, cancellationToken);
+        var result = await _alunoService.AdicionarMatriculaAsync(id, matriculaCompletaDto, cancellationToken);
         if (result)
         {
             return StatusCode(StatusCodes.Status201Created);
