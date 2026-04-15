@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
+using TelesEducacao.Alunos.Application.Queries;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Messages;
 
@@ -8,9 +10,42 @@ public class ConcluirCursoCommand : Command, IRequest
 {
     public Guid MatriculaId { get; init; }
 
-    public ConcluirCursoCommand(Guid matriculaId)
+    public int TotalAulasCurso { get; init; }
+
+    public ConcluirCursoCommand(Guid matriculaId, int totalAulasCurso)
     {
         MatriculaId = matriculaId;
+        TotalAulasCurso = totalAulasCurso;
+    }
+}
+
+public class ConcluirCursoCommandValidator : AbstractValidator<ConcluirCursoCommand>
+{
+    private readonly IAlunoQueries _alunoQueries;
+
+    public ConcluirCursoCommandValidator(IAlunoQueries alunoQueries)
+    {
+        _alunoQueries = alunoQueries;
+        RuleFor(x => x.MatriculaId).NotEmpty();
+        RuleFor(x => x.TotalAulasCurso).GreaterThan(0);
+        RuleFor(x => x).MustAsync(async (command, cancellationToken) => await IsConclusaoValidaAsync(command, cancellationToken));
+    }
+
+    public async Task<bool> IsConclusaoValidaAsync(ConcluirCursoCommand command, CancellationToken cancellationToken)
+    {
+        if (command.MatriculaId == Guid.Empty) return false;
+
+        var matricula = await _alunoQueries.ObterMatriculaPorIdAsync(command.MatriculaId, cancellationToken);
+
+        if (matricula.MatriculaStatus != MatriculaStatus.Ativa)
+            return false;
+
+        var totalAulasConcluidas = await _alunoQueries.ObterTotalAulasConcluidasPorMatriculaId(matricula.Id);
+
+        if (totalAulasConcluidas < command.TotalAulasCurso)
+            return false;
+
+        return true;
     }
 }
 

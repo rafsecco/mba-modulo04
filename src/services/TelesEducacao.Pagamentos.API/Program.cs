@@ -14,6 +14,7 @@ using TelesEducacao.Pagamentos.Data;
 using TelesEducacao.Pagamentos.Data.Repository;
 using TelesEducacao.WebAPI.Core.Database;
 using TelesEducacao.WebAPI.Core.Identidade;
+using TelesEducacao.Pagamentos.Data.Configuration;
 
 
 // aliases pra evitar conflito com IConfigurationManager do .NET
@@ -86,6 +87,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.Services.UseDbMigrationPagamentosHelper();
 
 if (app.Environment.IsDevelopment())
 {

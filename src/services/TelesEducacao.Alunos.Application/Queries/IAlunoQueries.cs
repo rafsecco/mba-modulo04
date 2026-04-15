@@ -1,17 +1,20 @@
 ﻿using TelesEducacao.Alunos.Application.Queries.Dtos;
-using TelesEducacao.Alunos.Domain;
 
 namespace TelesEducacao.Alunos.Application.Queries;
 
 public interface IAlunoQueries
 {
-    Task<IEnumerable<AlunoDto>> ObterTodos();
+    Task<IEnumerable<AlunoDto>> ObterTodosAsync(CancellationToken cancellationToken);
 
-    Task<AlunoDto> ObterPorId(Guid id);
+    Task<AlunoDto> ObterPorIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<IEnumerable<MatriculaDto>> ObterMatriculasPorAlunoId(Guid alunoId);
+    Task<IEnumerable<MatriculaDto>> ObterMatriculasPorAlunoIdAsync(Guid alunoId, CancellationToken cancellationToken);
 
-    Task<MatriculaDto> ObterMatriculaPorId(Guid matriculaId);
+    Task<MatriculaDto> ObterMatriculaPorIdAsync(Guid matriculaId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<AulaConluida>> ObterAulasConcluidasPorMatriculaId(Guid matriculaId);
+    Task<MatriculaDto> ObterMatriculaPorAlunoIdCursoId(Guid alunoId, Guid cursoId);
+
+    Task<IEnumerable<AulaConcluidaDto>> ObterAulasConcluidasPorMatriculaIdAsync(Guid matriculaId, CancellationToken cancellationToken);
+
+    Task<int> ObterTotalAulasConcluidasPorMatriculaId(Guid matriculaId);
 }
