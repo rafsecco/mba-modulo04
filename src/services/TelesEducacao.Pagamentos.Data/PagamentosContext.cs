@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Data;
@@ -30,11 +30,17 @@ public class PagamentosContext : DbContext, IUnitOfWork
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
-                     e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
-            property.SetColumnType("varchar(100)");
+		if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+		{
+			//HACK: pra não setar string como varchar(max)
+			foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
+				e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+			{
+				property.SetMaxLength(100);
+			}
+		}
 
-        modelBuilder.Ignore<Event>();
+		modelBuilder.Ignore<Event>();
 
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 

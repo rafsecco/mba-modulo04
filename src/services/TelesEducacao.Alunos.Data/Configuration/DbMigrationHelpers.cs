@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Common.Constants;
@@ -21,11 +21,15 @@ public static class DbMigrationHelpers
 
         var alunosContext = scope.ServiceProvider.GetRequiredService<AlunosContext>();
 
-        await alunosContext.Database.MigrateAsync();
-        if (alunosContext.Alunos.Any()) return;
+		if (alunosContext.Database.IsSqlServer())
+			await alunosContext.Database.MigrateAsync();
+		else
+			await alunosContext.Database.EnsureCreatedAsync();
+
+		if (alunosContext.Alunos.Any()) return;
 
         await CriaAlunoAsync(alunosContext);
-    }
+	}
 
     private static async Task CriaAlunoAsync(AlunosContext context)
     {

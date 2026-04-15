@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TelesEducacao.Core.Common.Constants;
@@ -23,9 +23,12 @@ public static class DbMigrationHelpers
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        await authContext.Database.MigrateAsync();
+		if (authContext.Database.IsSqlServer())
+			await authContext.Database.MigrateAsync();
+		else
+			await authContext.Database.EnsureCreatedAsync();
 
-        if (authContext.Users.Any()) return;
+		if (authContext.Users.Any()) return;
 
         await EnsureSeedRoles(roleManager);
         await EnsureUsers(authContext, userManager);

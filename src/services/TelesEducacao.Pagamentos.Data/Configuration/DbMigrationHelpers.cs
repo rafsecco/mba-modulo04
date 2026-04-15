@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TelesEducacao.Pagamentos.Data.Configuration;
@@ -19,6 +19,10 @@ public static class DbMigrationHelpers
         using var scope = serviceProvider.CreateScope();
 
         var conteudosContext = scope.ServiceProvider.GetRequiredService<PagamentosContext>();
-        await conteudosContext.Database.MigrateAsync();
-    }
+
+		if (conteudosContext.Database.IsSqlServer())
+			await conteudosContext.Database.MigrateAsync();
+		else
+			await conteudosContext.Database.EnsureCreatedAsync();
+	}
 }
