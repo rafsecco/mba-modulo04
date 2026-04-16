@@ -10,10 +10,10 @@ public class MatriculaMapping : IEntityTypeConfiguration<Matricula>
     {
         builder.HasKey(c => c.Id);
 
-        builder.Property(p => p.MatriculaStatus).HasDefaultValue(MatriculaStatus.PendentePagamento);
+        builder.Property(p => p.Status).HasDefaultValue(MatriculaStatus.PendentePagamento);
 
-		builder.HasOne(c => c.Aluno)
-			.WithMany(a => a.Matriculas)
-			.HasForeignKey(c => c.AlunoId);
-	}
+        builder.HasOne(c => c.Aluno)
+            .WithMany(a => a.Matriculas)
+            .HasForeignKey(c => c.AlunoId);
+    }
 }

@@ -7,7 +7,6 @@ using TelesEducacao.Core.Messages;
 
 namespace TelesEducacao.Alunos.Data;
 
-//TODO: o contexto de autenticacao que vai herdar de IdentityDbContext
 public class AlunosContext : DbContext, IUnitOfWork
 {
     private readonly IMediatorHandler _mediatorHandler;
@@ -24,22 +23,20 @@ public class AlunosContext : DbContext, IUnitOfWork
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-		base.OnModelCreating(modelBuilder);
-		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-		if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
-		{
-			//HACK: pra não setar string como varchar(max)
-			foreach (var property in modelBuilder.Model	.GetEntityTypes().SelectMany(
-				e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
-			{
-				property.SetMaxLength(100);
-			}
-		}
+        //HACK: pra não setar string como varchar(max)
+        foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
+            e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+        {
+            property.SetMaxLength(100);
+        }
 
-		modelBuilder.Ignore<Event>();
+        modelBuilder.Ignore<Event>();
 
-	}
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
 
     public async Task<bool> Commit()
     {

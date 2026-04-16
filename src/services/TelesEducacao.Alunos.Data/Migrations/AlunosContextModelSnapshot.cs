@@ -99,7 +99,7 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MatriculaStatus")
+                    b.Property<int?>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(1);

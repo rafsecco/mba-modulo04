@@ -15,14 +15,10 @@ public static class DbMigrationHelpers
 {
     public static async Task EnsureSeedData(IServiceProvider serviceProvider)
     {
-        
         using var scope = serviceProvider.CreateScope();
 
         var conteudosContext = scope.ServiceProvider.GetRequiredService<PagamentosContext>();
 
-		if (conteudosContext.Database.IsSqlServer())
-			await conteudosContext.Database.MigrateAsync();
-		else
-			await conteudosContext.Database.EnsureCreatedAsync();
-	}
+        await conteudosContext.Database.MigrateAsync();
+    }
 }

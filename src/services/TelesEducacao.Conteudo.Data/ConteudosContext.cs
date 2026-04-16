@@ -19,8 +19,11 @@ public class ConteudosContext : DbContext, IUnitOfWork
     {
         //HACK: pra não setar string como varchar(max)
         foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
-                     e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
-            property.SetColumnType("varchar(100)");
+            e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+        {
+            property.SetMaxLength(100);
+        }
+
         modelBuilder.Ignore<Event>();
 
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

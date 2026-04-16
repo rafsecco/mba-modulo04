@@ -13,6 +13,8 @@ public class CursoMapping : IEntityTypeConfiguration<Curso>
         builder.Property(p => p.Nome).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Descricao).IsRequired().HasMaxLength(300);
         builder.Property(p => p.Ativo).HasDefaultValue(true);
+        builder.Property(c => c.Valor)
+               .HasPrecision(18, 2);
 
         //transformando o objeto de valor ConteudoProgramatico em colunas na tabela Curso
         builder.OwnsOne(c => c.ConteudoProgramatico, cp =>

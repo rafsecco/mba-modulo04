@@ -12,7 +12,7 @@ using TelesEducacao.Alunos.Data;
 namespace TelesEducacao.Alunos.Data.Migrations
 {
     [DbContext(typeof(AlunosContext))]
-    [Migration("20260409231736_Initial")]
+    [Migration("20260415231743_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -102,7 +102,7 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MatriculaStatus")
+                    b.Property<int?>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(1);

@@ -8,7 +8,7 @@ public class Matricula : Entity
     public Aluno Aluno { get; private set; }
     public Guid CursoId { get; private set; }
 
-    public MatriculaStatus MatriculaStatus { get; private set; }
+    public MatriculaStatus? Status { get; private set; }
 
     public List<Certificado> Certificados { get; private set; }
 
@@ -16,7 +16,7 @@ public class Matricula : Entity
     {
         AlunoId = alunoId;
         CursoId = cursoId;
-        MatriculaStatus = MatriculaStatus.PendentePagamento;
+        Status = MatriculaStatus.PendentePagamento;
     }
 
     protected Matricula()
@@ -24,6 +24,6 @@ public class Matricula : Entity
 
     public void AtualizarStatus(MatriculaStatus novoStatus)
     {
-        MatriculaStatus = novoStatus;
+        Status = novoStatus;
     }
 }

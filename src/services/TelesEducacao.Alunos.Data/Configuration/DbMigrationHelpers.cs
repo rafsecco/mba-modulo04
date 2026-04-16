@@ -21,15 +21,12 @@ public static class DbMigrationHelpers
 
         var alunosContext = scope.ServiceProvider.GetRequiredService<AlunosContext>();
 
-		if (alunosContext.Database.IsSqlServer())
-			await alunosContext.Database.MigrateAsync();
-		else
-			await alunosContext.Database.EnsureCreatedAsync();
+        await alunosContext.Database.MigrateAsync();
 
-		if (alunosContext.Alunos.Any()) return;
+        if (alunosContext.Alunos.Any()) return;
 
         await CriaAlunoAsync(alunosContext);
-	}
+    }
 
     private static async Task CriaAlunoAsync(AlunosContext context)
     {

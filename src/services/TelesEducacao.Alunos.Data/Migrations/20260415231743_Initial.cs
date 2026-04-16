@@ -32,7 +32,7 @@ namespace TelesEducacao.Alunos.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AlunoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CursoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MatriculaStatus = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    Status = table.Column<int>(type: "int", nullable: true, defaultValue: 1),
                     DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
