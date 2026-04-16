@@ -1,11 +1,140 @@
+version: "3.9"
+
 services:
   rabbitmq:
     image: rabbitmq:management-alpine
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
-# Na pasta docker execute os seguintes comandos para configurar o ambiente:
-# cp .env.example .env
-# Edite o arquivo .env com as variáveis de ambiente necessárias
-# docker compose -f docker-compose.yml up -d --build
+  database:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=${MSSQL_PID}
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  auth:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /app
+    volumes:
+      - ../src/services/TelesEducacao.Auth.Api:/app:cached
+    ports:
+      - "5101:5101"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5101
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=TelesEducacaoAuthDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=${RABBITMQ_DEFAULT_USER};password=${RABBITMQ_DEFAULT_PASS};publisherConfirms=true;timeout=100
+    depends_on:
+      - database
+      - rabbitmq
+    command: ["dotnet", "run", "--no-launch-profile"]
+
+  alunos:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /app
+    volumes:
+      - ../src/services/TelesEducacao.Alunos.API:/app:cached
+    ports:
+      - "5201:5201"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5201
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=TelesEducacaoAlunosDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=${RABBITMQ_DEFAULT_USER};password=${RABBITMQ_DEFAULT_PASS};publisherConfirms=true;timeout=100
+      - AppSettings__AutenticacaoJwksUrl=http://auth:5101/jwks
+    depends_on:
+      - database
+      - rabbitmq
+      - auth
+    command: ["dotnet", "run", "--no-launch-profile"]
+
+  conteudo:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /app
+    volumes:
+      - ../src/services/TelesEducacao.Conteudo.API:/app:cached
+    ports:
+      - "5301:5301"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5301
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=TelesEducacaoConteudoDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=${RABBITMQ_DEFAULT_USER};password=${RABBITMQ_DEFAULT_PASS};publisherConfirms=true;timeout=100
+      - AppSettings__AutenticacaoJwksUrl=http://auth:5101/jwks
+    depends_on:
+      - database
+      - rabbitmq
+      - auth
+    command: ["dotnet", "run", "--no-launch-profile"]
+
+  pagamentos:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /app
+    volumes:
+      - ../src/services/TelesEducacao.Pagamentos.API:/app:cached
+    ports:
+      - "5401:5401"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5401
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=TelesEducacaoPagamentosDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - MessageQueueConnection__MessageBus=host=rabbitmq:5672;username=${RABBITMQ_DEFAULT_USER};password=${RABBITMQ_DEFAULT_PASS};publisherConfirms=true;timeout=100
+      - AppSettings__AutenticacaoJwksUrl=http://auth:5101/jwks
+    depends_on:
+      - database
+      - rabbitmq
+      - auth
+    command: ["dotnet", "run", "--no-launch-profile"]
+
+  bff:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /app
+    volumes:
+      - ../src/api-gateways/TelesEducacao.Bff.Plataforma:/app:cached
+    ports:
+      - "5035:5035"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5035
+      - AppServicesSettings__AlunoUrl=http://alunos:5201
+      - AppServicesSettings__ConteudoUrl=http://conteudo:5301
+      - AppServicesSettings__PagamentoUrl=http://pagamentos:5401
+      - AppServicesSettings__AuthUrl=http://auth:5101
+      - AppSettings__AutenticacaoJwksUrl=http://auth:5101/jwks
+    depends_on:
+      - auth
+      - alunos
+      - conteudo
+      - pagamentos
+    command: ["dotnet", "run", "--no-launch-profile"]
+
+volumes:
+  sqlserverdata:
+  rabbitmqdata:
+
+# Para executar:
+# 1) copie docker/.env.example para docker/.env
+# 2) ajuste as senhas no .env se desejar
+# 3) execute: docker compose -f docker-compose.yml up --build
+
