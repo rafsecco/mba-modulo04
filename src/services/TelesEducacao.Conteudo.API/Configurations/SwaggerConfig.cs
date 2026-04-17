@@ -4,59 +4,56 @@ namespace TelesEducacao.Conteudo.API.Configurations;
 
 public static class SwaggerConfigs
 {
-	public static IServiceCollection AddSwaggerConfigureServices(this IServiceCollection services)
-	{
-		services.AddEndpointsApiExplorer();
+    public static IServiceCollection AddSwaggerConfigureServices(this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
 
-		services.AddSwaggerGen(c =>
-		{
-			c.SwaggerDoc("v1", new OpenApiInfo
-			{
-				Title = "Teles Educação API de Conteúdo",
-				Version = "v1",
-				Description = "Documentação da API com autenticação JWT"
-			});
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Teles Educação API de Conteúdo",
+                Version = "v1",
+                Description = "Documentação da API com autenticação JWT"
+            });
 
-			c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-			{
-				Description = "Insira o Token JWT dessa forma: Bearer {seu token}",
-				Name = "Authorization",
-				In = ParameterLocation.Header,
-				Type = SecuritySchemeType.Http,
-				Scheme = "bearer",
-				BearerFormat = "JWT"
-			});
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "Insira o Token JWT dessa forma: Bearer {seu token}",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            });
 
-			c.AddSecurityRequirement(new OpenApiSecurityRequirement
-			{
-				{
-					new OpenApiSecurityScheme
-					{
-						Scheme = "bearer",
-						Name = "Authorization",
-						In = ParameterLocation.Header,
-						Type = SecuritySchemeType.Http
-					},
-					Array.Empty<string>()
-				}
-			});
-		});
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Scheme = "bearer",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
-		return services;
-	}
+        return services;
+    }
 
-	public static WebApplication UseSwaggerConfiguration(this WebApplication app)
-	{
-		if (app.Environment.IsDevelopment())
-		{
-			app.UseSwagger();
+    public static WebApplication UseSwaggerConfiguration(this WebApplication app)
+    {
+        app.UseSwagger();
 
-			app.UseSwaggerUI(c =>
-			{
-				c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelesEducacao Conteúdo API v1");
-			});
-		}
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelesEducacao Conteúdo API v1");
+        });
 
-		return app;
-	}
+        return app;
+    }
 }

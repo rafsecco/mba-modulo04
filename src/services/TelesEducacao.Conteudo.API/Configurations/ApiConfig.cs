@@ -1,19 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using TelesEducacao.Conteudos.Application.AutoMapper;
 using TelesEducacao.Conteudos.Data;
+using TelesEducacao.WebAPI.Core.Database;
 using TelesEducacao.WebAPI.Core.Identidade;
 
 namespace TelesEducacao.Conteudo.API.Configurations;
 
 public static class ApiConfig
 {
-	public static IServiceCollection AddApiConfigurations(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddApiConfigurations(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
 	{
 		services.AddControllers();
 
-		services.AddDbContext<ConteudosContext>(options =>
-			options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+		services.AddDatabase<ConteudosContext>(configuration, environment);
 
 		services.AddCors(options =>
 		{

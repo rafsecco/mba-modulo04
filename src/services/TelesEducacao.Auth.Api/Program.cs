@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using NetDevPack.Security.JwtSigningCredentials;
 using NetDevPack.Security.JwtSigningCredentials.AspNetCore;
@@ -12,6 +11,7 @@ using TelesEducacao.Auth.Data;
 using TelesEducacao.Auth.Data.Configuration;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
+using TelesEducacao.WebAPI.Core.Database;
 using TelesEducacao.WebAPI.Core.Usuario;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Database
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDatabase<AuthDbContext>(builder.Configuration, builder.Environment);
 
 // Identity
 var appSettingsSection = builder.Configuration.GetSection("AppTokenSettings");
@@ -58,9 +57,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Teles Educação API de Autenticação",
+        Title = "Teles EducaÃ§Ã£o API de AutenticaÃ§Ã£o",
         Version = "v1",
-        Description = "Documentação da API de autenticação JWT",
+        Description = "DocumentaÃ§Ã£o da API de autenticaÃ§Ã£o JWT",
     });
 });
 
@@ -74,7 +73,7 @@ app.Services.UseDbMigrationAuthHelper();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Autenticação v1");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles EducaÃ§Ã£o API AutenticaÃ§Ã£o v1");
 });
 
 app.UseHttpsRedirection();

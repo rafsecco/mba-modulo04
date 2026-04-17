@@ -31,7 +31,7 @@ namespace TelesEducacao.Conteudos.Data.Migrations
                     b.Property<string>("Conteudo")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("CursoId")
                         .HasColumnType("uniqueidentifier");
@@ -49,7 +49,7 @@ namespace TelesEducacao.Conteudos.Data.Migrations
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -78,14 +78,15 @@ namespace TelesEducacao.Conteudos.Data.Migrations
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Valor")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -113,11 +114,13 @@ namespace TelesEducacao.Conteudos.Data.Migrations
 
                             b1.Property<string>("Descricao")
                                 .IsRequired()
+                                .HasMaxLength(100)
                                 .HasColumnType("varchar(500)")
                                 .HasColumnName("DescricaoConteudoProgramatico");
 
                             b1.Property<string>("Titulo")
                                 .IsRequired()
+                                .HasMaxLength(100)
                                 .HasColumnType("varchar(100)")
                                 .HasColumnName("TituloConteudoProgramatico");
 

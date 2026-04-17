@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
@@ -7,7 +7,6 @@ using TelesEducacao.Core.Messages;
 
 namespace TelesEducacao.Alunos.Data;
 
-//TODO: o contexto de autenticacao que vai herdar de IdentityDbContext
 public class AlunosContext : DbContext, IUnitOfWork
 {
     private readonly IMediatorHandler _mediatorHandler;
@@ -29,10 +28,14 @@ public class AlunosContext : DbContext, IUnitOfWork
 
         //HACK: pra não setar string como varchar(max)
         foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
-                     e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
-            property.SetColumnType("varchar(100)");
+            e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+        {
+            property.SetMaxLength(100);
+        }
 
         modelBuilder.Ignore<Event>();
+
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
     public async Task<bool> Commit()
