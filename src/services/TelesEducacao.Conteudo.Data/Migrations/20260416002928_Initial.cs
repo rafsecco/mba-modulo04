@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TelesEducacao.Conteudos.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_Conteudo : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,13 +16,13 @@ namespace TelesEducacao.Conteudos.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Nome = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    Descricao = table.Column<string>(type: "varchar(100)", maxLength: 300, nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descricao = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Ativo = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    Valor = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Valor = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     CargaHoraria = table.Column<TimeSpan>(type: "time", nullable: true),
-                    TituloConteudoProgramatico = table.Column<string>(type: "varchar(100)", nullable: false),
-                    DescricaoConteudoProgramatico = table.Column<string>(type: "varchar(500)", nullable: false),
+                    TituloConteudoProgramatico = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    DescricaoConteudoProgramatico = table.Column<string>(type: "varchar(500)", maxLength: 100, nullable: false),
                     DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -35,10 +35,10 @@ namespace TelesEducacao.Conteudos.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Titulo = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    Conteudo = table.Column<string>(type: "varchar(100)", maxLength: 500, nullable: false),
+                    Titulo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Conteudo = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Duracao = table.Column<TimeSpan>(type: "time", nullable: true),
-                    MaterialApoio = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaterialApoio = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     CursoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },

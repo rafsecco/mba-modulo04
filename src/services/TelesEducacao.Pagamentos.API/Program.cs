@@ -12,6 +12,7 @@ using TelesEducacao.Pagamentos.API.Models;
 using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
 using TelesEducacao.Pagamentos.Data.Repository;
+using TelesEducacao.WebAPI.Core.Database;
 using TelesEducacao.WebAPI.Core.Identidade;
 using TelesEducacao.Pagamentos.Data.Configuration;
 
@@ -24,8 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<PagamentosContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDatabase<PagamentosContext>(builder.Configuration, builder.Environment);
 
 builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPagamentoCartaoCreditoFacade, PagamentoCartaoCreditoFacade>();
