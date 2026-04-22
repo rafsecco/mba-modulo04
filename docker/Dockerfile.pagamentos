@@ -1,0 +1,29 @@
+# ===== BUILD =====
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copia apenas os csproj primeiro (cache inteligente)
+COPY src/services/TelesEducacao.Pagamentos.API/*.csproj ./services/TelesEducacao.Pagamentos.API/
+COPY src/services/TelesEducacao.Pagamentos.AntiCorruption/*.csproj ./services/TelesEducacao.Pagamentos.AntiCorruption/
+COPY src/services/TelesEducacao.Pagamentos.Business/*.csproj ./services/TelesEducacao.Pagamentos.Business/
+COPY src/services/TelesEducacao.Pagamentos.Data/*.csproj ./services/TelesEducacao.Pagamentos.Data/
+COPY src/building-blocks/TelesEducacao.Core/*.csproj ./building-blocks/TelesEducacao.Core/
+COPY src/building-blocks/TelesEducacao.MessageBus/*.csproj ./building-blocks/TelesEducacao.MessageBus/
+COPY src/building-blocks/TelesEducacao.WebAPI.Core/*.csproj ./building-blocks/TelesEducacao.WebAPI.Core/
+
+# restore só do projeto (não da solution)
+RUN dotnet restore ./services/TelesEducacao.Pagamentos.API/TelesEducacao.Pagamentos.API.csproj
+
+# agora copia o resto
+COPY src ./
+
+WORKDIR /src/services/TelesEducacao.Pagamentos.API
+RUN dotnet publish -c Release -o /app/publish
+
+# ===== RUNTIME =====
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 5301
+ENTRYPOINT ["dotnet", "TelesEducacao.Pagamentos.API.dll"]

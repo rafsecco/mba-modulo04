@@ -1,0 +1,39 @@
+# ===== BUILD =====
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# -----------------------------
+# 1. Copia csproj (cache)
+# -----------------------------
+
+# BFF
+COPY src/api-gateways/TelesEducacao.Bff.Plataforma/*.csproj ./api-gateways/TelesEducacao.Bff.Plataforma/
+
+# Building blocks (dependências comuns)
+COPY src/building-blocks/TelesEducacao.Core/*.csproj ./building-blocks/TelesEducacao.Core/
+COPY src/building-blocks/TelesEducacao.WebAPI.Core/*.csproj ./building-blocks/TelesEducacao.WebAPI.Core/
+
+# -----------------------------
+# 2. Restore
+# -----------------------------
+RUN dotnet restore ./api-gateways/TelesEducacao.Bff.Plataforma/TelesEducacao.Bff.Plataforma.csproj
+
+# -----------------------------
+# 3. Copia tudo
+# -----------------------------
+COPY src ./
+
+# -----------------------------
+# 4. Publish
+# -----------------------------
+WORKDIR /src/api-gateways/TelesEducacao.Bff.Plataforma
+RUN dotnet publish -c Release -o /app/publish
+
+# ===== RUNTIME =====
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 5035
+
+ENTRYPOINT ["dotnet", "TelesEducacao.Bff.Plataforma.dll"]

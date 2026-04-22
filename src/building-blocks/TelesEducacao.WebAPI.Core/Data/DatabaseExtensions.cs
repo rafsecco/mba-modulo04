@@ -29,10 +29,22 @@ public static class DatabaseExtensions
             }
             else
             {
-                var connection = configuration.GetConnectionString("SqlServer");
+                // Para Docker, Staging e Production, tenta DefaultConnection primeiro, depois SqlServer
+                string? connection = null;
+
+                if (environment.EnvironmentName == "Docker")
+                {
+                    connection = configuration.GetConnectionString("DefaultConnection");
+                }
+
+                // Fallback para SqlServer se DefaultConnection não existir ou se não for Docker
+                if (string.IsNullOrEmpty(connection))
+                {
+                    connection = configuration.GetConnectionString("SqlServer");
+                }
 
                 if (string.IsNullOrEmpty(connection))
-                    throw new InvalidOperationException("Connection SQL Server não configurada.");
+                    throw new InvalidOperationException($"Connection Database não configurada para o ambiente {environment.EnvironmentName}.");
 
                 options.UseSqlServer(connection);
             }
