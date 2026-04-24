@@ -1,6 +1,6 @@
 using TelesEducacao.Conteudos.Application.AutoMapper;
 using TelesEducacao.Conteudos.Data;
-using TelesEducacao.WebAPI.Core.Database;
+using TelesEducacao.WebAPI.Core.Data;
 using TelesEducacao.WebAPI.Core.Identidade;
 
 namespace TelesEducacao.Conteudo.API.Configurations;

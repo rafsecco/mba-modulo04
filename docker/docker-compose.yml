@@ -2,10 +2,119 @@ services:
   rabbitmq:
     image: rabbitmq:management-alpine
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
 
-# Na pasta docker execute os seguintes comandos para configurar o ambiente:
-# cp .env.example .env
-# Edite o arquivo .env com as variáveis de ambiente necessárias
-# docker compose -f docker-compose.yml up -d --build
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=${MSSQL_PID}
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${MSSQL_SA_PASSWORD} -Q \"SELECT 1\" -b -C"]
+      interval: 15s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
+
+  auth:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.auth
+    ports:
+      - "5101:5101"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5101
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  alunos:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.alunos
+    ports:
+      - "5201:5201"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5201
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth:
+        condition: service_started
+
+  conteudo:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.conteudo
+    ports:
+      - "5301:5301"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5301
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth:
+        condition: service_started
+
+  pagamentos:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.pagamentos
+    ports:
+      - "5401:5401"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5401
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth:
+        condition: service_started
+
+  bff:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bff
+    ports:
+      - "5035:5035"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:5035
+    depends_on:
+      - auth
+      - alunos
+      - conteudo
+      - pagamentos
+
+volumes:
+  sqlserverdata:
+  rabbitmqdata:
+

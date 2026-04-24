@@ -53,9 +53,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Teles Educação BFF API Gateway",
+        Title = "Teles EducaÃ§Ã£o BFF API Gateway",
         Version = "v1",
-        Description = "BFF da plataforma Teles Educação",
+        Description = "BFF da plataforma Teles EducaÃ§Ã£o",
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -90,7 +90,7 @@ app.UseCors("Total");
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação BFF API Gateway v1");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles EducaÃ§Ã£o BFF API Gateway v1");
 });
 
 app.UseHttpsRedirection();
@@ -98,5 +98,11 @@ app.UseHttpsRedirection();
 app.UseAuthConfiguration();
 
 app.MapControllers();
+
+app.Use(async (context, next) =>
+{
+	context.Response.Headers.Append("Content-Type", "application/json; charset=utf-8");
+	await next();
+});
 
 app.Run();

@@ -1,21 +1,14 @@
-using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Pagamentos.AntiCorruption;
 using TelesEducacao.Pagamentos.API.Configuration;
 using TelesEducacao.Pagamentos.API.Controllers;
-using TelesEducacao.Pagamentos.API.Models;
 using TelesEducacao.Pagamentos.Business;
 using TelesEducacao.Pagamentos.Data;
-using TelesEducacao.Pagamentos.Data.Repository;
-using TelesEducacao.WebAPI.Core.Database;
-using TelesEducacao.WebAPI.Core.Identidade;
 using TelesEducacao.Pagamentos.Data.Configuration;
-
+using TelesEducacao.Pagamentos.Data.Repository;
+using TelesEducacao.WebAPI.Core.Data;
+using TelesEducacao.WebAPI.Core.Identidade;
 
 // aliases pra evitar conflito com IConfigurationManager do .NET
 using IPagamentosConfigManager = TelesEducacao.Pagamentos.AntiCorruption.IConfigurationManager;
@@ -42,7 +35,6 @@ builder.Services.AddMediatR(cfg =>
     ));
 
 builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
-
 
 builder.Services.AddJwtConfiguration(builder.Configuration);
 
@@ -90,14 +82,11 @@ var app = builder.Build();
 
 app.Services.UseDbMigrationPagamentosHelper();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Pagamentos v1");
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Pagamentos v1");
+});
 
 app.UseHttpsRedirection();
 
