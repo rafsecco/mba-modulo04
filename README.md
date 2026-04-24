@@ -160,4 +160,3 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
 - [Jefferson Molaz] - @jmolaz 
 - [Karollainny Teles] - @karollainny.teles
 - [Rafael Secco] - @rafaelsecco
-
