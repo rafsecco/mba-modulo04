@@ -155,6 +155,7 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
 
 ---
 
+
 ### Desenvolvido por
 - [Guilherme Sant'Anna] - @guilhermesantannadev
 - [Jefferson Molaz] - @jmolaz 
