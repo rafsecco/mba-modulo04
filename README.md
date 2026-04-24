@@ -134,8 +134,7 @@ A solução foi desenhada seguindo a premissa de **Contextos Delimitados** e **M
     * **Alunos API:** `http://localhost:5201`
     * **Auth API:** `http://localhost:5101`
     * **Conteudo API:** `http://localhost:5301`
-    * **Pagamentos API:** `http://localhost:5401`
-
+    
 ---
 
 ## **7. Documentação da API**
@@ -145,7 +144,7 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
   * **Alunos API:** `http://localhost:5201/swagger/index.html`
   * **Auth API:** `http://localhost:5101/swagger/index.html`
   * **Conteudo API:** `http://localhost:5301/swagger/index.html`
-  * **Pagamentos API:** `http://localhost:5401/swagger/index.html`
+  
 
 ---
 
@@ -156,9 +155,10 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
 
 ---
 
+
 ### Desenvolvido por
-- [Guilherme Sant'Anna](https://github.com/svcguilherme)
-- [Jefferson Molaz](https://github.com/jmolaz)
-- [Karollainny Teles](https://github.com/karollainnyteles).
-- [Rafael Secco](https://github.com/rafsecco)
+- [Guilherme Sant'Anna] - @guilhermesantannadev
+- [Jefferson Molaz] - @jmolaz 
+- [Karollainny Teles] - @karollainny.teles
+- [Rafael Secco] - @rafaelsecco
 
