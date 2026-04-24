@@ -158,5 +158,9 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
 - [Guilherme Sant'Anna] - @guilhermesantannadev
 - [Jefferson Molaz] - @jmolaz
 - [Karollainny Teles] - @karollainny.teles
+<<<<<<< HEAD
 - [Rafael Secco] - @rafaelsecco
 
+=======
+- [Rafael Secco] - @rafaelsecco
+>>>>>>> 001aaf2b5853245aa5e0ca6d27ea1fca69ec80ff
