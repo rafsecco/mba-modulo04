@@ -11,7 +11,7 @@ using TelesEducacao.Alunos.Data.Repository;
 using TelesEducacao.Alunos.Domain;
 using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
-using TelesEducacao.WebAPI.Core.Database;
+using TelesEducacao.WebAPI.Core.Data;
 using TelesEducacao.WebAPI.Core.Identidade;
 
 var builder = WebApplication.CreateBuilder(args);
