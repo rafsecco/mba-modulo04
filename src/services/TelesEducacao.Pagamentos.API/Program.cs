@@ -16,7 +16,6 @@ using TelesEducacao.WebAPI.Core.Database;
 using TelesEducacao.WebAPI.Core.Identidade;
 using TelesEducacao.Pagamentos.Data.Configuration;
 
-
 // aliases pra evitar conflito com IConfigurationManager do .NET
 using IPagamentosConfigManager = TelesEducacao.Pagamentos.AntiCorruption.IConfigurationManager;
 using PagamentosConfigManager = TelesEducacao.Pagamentos.AntiCorruption.ConfigurationManager;
@@ -42,7 +41,6 @@ builder.Services.AddMediatR(cfg =>
     ));
 
 builder.Services.AddScoped<IMediatorHandler, MediatorHandler>();
-
 
 builder.Services.AddJwtConfiguration(builder.Configuration);
 
@@ -90,14 +88,11 @@ var app = builder.Build();
 
 app.Services.UseDbMigrationPagamentosHelper();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Pagamentos v1");
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Teles Educação API Pagamentos v1");
+});
 
 app.UseHttpsRedirection();
 
