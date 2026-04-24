@@ -8,7 +8,7 @@ using TelesEducacao.Core.Communication.Mediator;
 using TelesEducacao.Core.Messages.CommomMessages.Notifications;
 using TelesEducacao.WebAPI.Core.Controllers;
 
-namespace TelesEducacao.Auth.Api.Controllers;
+namespace TelesEducacao.Auth.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
