@@ -157,8 +157,7 @@ A documentação completa dos endpoints, modelos de entrada e saída pode ser ac
 
 
 ### Desenvolvido por
-- [Guilherme Sant'Anna] - @guilhermesantannadev
-- [Jefferson Molaz] - @jmolaz 
-- [Karollainny Teles] - @karollainny.teles
-- [Rafael Secco] - @rafaelsecco
-
+- [Guilherme Sant'Anna](https://github.com/svcguilherme)
+- [Jefferson Molaz](https://github.com/jmolaz)
+- [Karollainny Teles](https://github.com/karollainnyteles)
+- [Rafael Secco](https://github.com/rafsecco)
