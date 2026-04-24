@@ -112,7 +112,7 @@ A solução foi desenhada seguindo a premissa de **Contextos Delimitados** e **M
       * Execute cada serviço API individualmente:
         ```bash
         dotnet run --project src/services/TelesEducacao.Alunos.API
-        dotnet run --project src/services/TelesEducacao.Auth.Api
+        dotnet run --project src/services/TelesEducacao.Auth.API
         dotnet run --project src/services/TelesEducacao.Conteudo.API
         dotnet run --project src/services/TelesEducacao.Pagamentos.API
         dotnet run --project src/api-gateways/TelesEducacao.Bff.Plataforma
