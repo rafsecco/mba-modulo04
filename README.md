@@ -119,7 +119,7 @@ A solução foi desenhada seguindo a premissa de **Contextos Delimitados** e **M
         ```
      * Em Ambiente **Staging** (SQL Server):
        * Inicie o RabbitMQ (Igual ao passo para Development):
-       * Inicir o serviço do SQL Server local
+       * Inicie o serviço do SQL Server local
        * Execute cada serviço API individualmente:
           ```bash
           dotnet run --project src/services/TelesEducacao.Alunos.API --launch-profile "Staging"
